@@ -12,28 +12,15 @@ settings:
     ENABLE_BITCODE: "NO"
     SWIFT_OPTIMIZATION_LEVEL: "-O"
 
-# 显式声明 scheme：xcodebuild -scheme 需要它真实存在，
-# 不能依赖 Xcode 打开工程时自动创建（CI 是无头环境）。
-schemes:
-  NonameDecade:
-    build:
-      targets:
-        NonameDecade: all
-    run:
-      config: Debug
-    profile:
-      config: Release
-    analyze:
-      config: Debug
-    archive:
-      config: Release
-
 targets:
   NonameDecade:
     type: application
     platform: iOS
     deploymentTarget: "15.0"
 
+    # 注意：这里刻意保持精简。
+    # 不声明 schemes —— CI 用 `xcodebuild -target` 直接编 target，
+    # 不依赖磁盘上的 scheme 文件；在 Mac 上用 Xcode 打开时会自动生成 scheme。
     sources:
       - path: NonameDecade/Sources
       - path: NonameDecade/Assets.xcassets
@@ -51,9 +38,10 @@ targets:
         LSRequiresIPhoneOS: true
         UIRequiresFullScreen: true
         UIViewControllerBasedStatusBarAppearance: true
-        # 用 plist 形式的启动屏（iOS 14+），不依赖 storyboard，
-        # 既避免 ibtool 编译风险，也能保证 iPad 全屏不受黑边影响。
-        UILaunchScreen: {}
+        # plist 形式的启动屏（iOS 14+），不依赖 storyboard。
+        # 必须是非空字典，否则 XcodeGen 生成工程可能出错。
+        UILaunchScreen:
+          UIColorName: LaunchBackground
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         ITSAppUsesNonExemptEncryption: false

@@ -3,8 +3,12 @@ name: build-ipa
 # 在 GitHub 提供的 macOS runner 上构建「未签名 IPA」。
 # 你不需要 Mac：产物下载到 Windows 后，用 Sideloadly + Apple ID 签名安装到 iPad。
 #
-# 用法：推到 GitHub 后，在 Actions 页手动触发（workflow_dispatch），
-#       或 push 到 main 自动构建。构建完成后在 Artifacts 下载 NonameDecade-unsigned-ipa。
+# 设计要点（都是为 CI 稳定性做的）：
+#   1. 用 `xcodebuild -target` 而不是 `-scheme`：不依赖磁盘上的 scheme 文件，
+#      也从根上避开 "does not contain a scheme named ..." 这类失败。
+#   2. 每一步都用 tee 落盘日志；失败时把错误以 ::error:: 抛出成 annotation，
+#      annotation 无需登录即可通过 GitHub API 读取，便于远程排障。
+#   3. 产物用 find 定位，不硬编码路径。
 
 on:
   workflow_dispatch:
@@ -48,11 +52,11 @@ jobs:
       - name: 生成 Xcode 工程
         working-directory: ios
         run: |
-          xcodegen generate
-          echo "---- 工程内容 ----"
-          ls -la
-          echo "---- 可用的 scheme / target ----"
-          xcodebuild -list -project NonameDecade.xcodeproj
+          set -o pipefail
+          xcodegen generate 2>&1 | tee xcodegen.log
+          echo "---- 生成结果 ----" | tee -a xcodegen.log
+          ls -la | tee -a xcodegen.log
+          xcodebuild -list -project NonameDecade.xcodeproj 2>&1 | tee -a xcodegen.log
 
       - name: 构建（不签名）
         id: build
@@ -61,10 +65,12 @@ jobs:
           set -o pipefail
           xcodebuild \
             -project NonameDecade.xcodeproj \
-            -scheme NonameDecade \
+            -target NonameDecade \
             -configuration Release \
-            -destination 'generic/platform=iOS' \
-            -derivedDataPath build \
+            -sdk iphoneos \
+            -arch arm64 \
+            SYMROOT="$PWD/build/sym" \
+            OBJROOT="$PWD/build/obj" \
             CODE_SIGNING_ALLOWED=NO \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGN_IDENTITY="" \
@@ -72,37 +78,41 @@ jobs:
             ONLY_ACTIVE_ARCH=NO \
             build 2>&1 | tee build.log
 
-      # 关键排障步骤：把编译错误以 annotation 形式抛出来。
-      # annotation 无需登录即可通过 GitHub API 读取，便于远程定位问题。
+      # 把编译/生成错误以 annotation 抛出（annotation 无需登录即可读）
       - name: 失败时暴露错误明细
         if: failure()
         working-directory: ios
         run: |
-          echo "================= 关键错误行 ================="
-          if [ -f build.log ]; then
-            grep -nE "error:|fatal error:|xcodebuild: error|does not contain a scheme|The following build commands failed|Command .* failed|Undefined symbol|not found" build.log | head -40 || true
-            echo "================= build.log 末尾 100 行 ================="
-            tail -100 build.log || true
-            echo "================= 抛成注解 ================="
-            grep -nE "error:|fatal error:|xcodebuild: error|does not contain a scheme|The following build commands failed" build.log \
-              | head -20 \
+          echo "=========== 目录里的日志文件 ==========="
+          ls -la *.log 2>/dev/null || echo "(没有 .log 文件)"
+
+          for f in xcodegen.log build.log; do
+            [ -f "$f" ] || continue
+            echo ""
+            echo "=========== $f 末尾 100 行 ==========="
+            tail -100 "$f" || true
+            echo ""
+            echo "=========== $f 中的错误行 ==========="
+            grep -nE "error:|fatal error:|xcodebuild: error|does not contain a scheme|The following build commands failed|Command .* failed|Undefined symbol|Unknown attribute|does not exist|Unexpected" "$f" | head -25 || true
+            echo ""
+            echo "=========== 抛成注解 ==========="
+            grep -nE "error:|fatal error:|xcodebuild: error|does not contain a scheme|The following build commands failed|Unexpected|does not exist" "$f" \
+              | head -15 \
               | while IFS= read -r line; do
-                  safe=$(printf '%s' "$line" | tr -d '\r' | head -c 900)
-                  echo "::error::${safe}"
+                  echo "::error::$(printf '%s' "$line" | tr -d '\r' | head -c 900)"
                 done
-          else
-            echo "::error::没有生成 build.log —— 构建根本没开始，可能是 scheme 或工程生成有问题"
-          fi
+          done
+          echo "::error::构建失败，详见上方日志（run page 可下载完整日志）"
 
       - name: 定位产物
         if: success()
         working-directory: ios
         run: |
-          echo "== 搜索 .app =="
-          find build -name "*.app" -maxdepth 6 -type d || true
-          APP=$(find build -name "NonameDecade.app" -type d | head -1)
-          echo "APP=$APP" >> "$GITHUB_ENV"
+          APP=$(find . -name "NonameDecade.app" -type d | head -1)
+          echo "== 搜索到 =="
+          find . -name "*.app" -type d || true
           echo "解析到：$APP"
+          echo "APP=$APP" >> "$GITHUB_ENV"
 
       - name: 校验产物
         if: success()
@@ -149,6 +159,6 @@ jobs:
         with:
           name: build-logs
           path: |
+            ios/xcodegen.log
             ios/build.log
-            ios/build/Logs/**
           if-no-files-found: ignore
