@@ -1,0 +1,218 @@
+Command line invocation:
+    /Applications/Xcode_16.4.app/Contents/Developer/usr/bin/xcodebuild -project NonameDecade.xcodeproj -target NonameDecade -configuration Release -sdk iphoneos -arch arm64 SYMROOT=/Users/runner/work/noname-ipad/noname-ipad/ios/build/sym OBJROOT=/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj CODE_SIGNING_ALLOWED=NO CODE_SIGNING_REQUIRED=NO CODE_SIGN_IDENTITY= CODE_SIGN_ENTITLEMENTS= ONLY_ACTIVE_ARCH=NO build
+
+Build settings from command line:
+    ARCHS = arm64
+    CODE_SIGN_ENTITLEMENTS = 
+    CODE_SIGN_IDENTITY = 
+    CODE_SIGNING_ALLOWED = NO
+    CODE_SIGNING_REQUIRED = NO
+    OBJROOT = /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj
+    ONLY_ACTIVE_ARCH = NO
+    SDKROOT = iphoneos18.5
+    SYMROOT = /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym
+
+note: Using codesigning identity override: 
+ComputePackagePrebuildTargetDependencyGraph
+
+Prepare packages
+
+CreateBuildRequest
+
+SendProjectDescription
+
+CreateBuildOperation
+
+ComputeTargetDependencyGraph
+note: Building targets in dependency order
+note: Target dependency graph (1 target)
+    Target 'NonameDecade' in project 'NonameDecade' (no dependencies)
+
+GatherProvisioningInputs
+
+CreateBuildDescription
+
+ExecuteExternalTool /Applications/Xcode_16.4.app/Contents/Developer/usr/bin/actool --print-asset-tag-combinations --output-format xml1 /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Assets.xcassets
+
+ExecuteExternalTool /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang -v -E -dM -isysroot /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.5.sdk -x c -c /dev/null
+
+ExecuteExternalTool /Applications/Xcode_16.4.app/Contents/Developer/usr/bin/actool --version --output-format xml1
+
+ExecuteExternalTool /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc --version
+
+ExecuteExternalTool /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/ld -version_details
+
+Build description signature: 2f492c0edcc264912968db023ee63f41
+Build description path: /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/XCBuildData/2f492c0edcc264912968db023ee63f41.xcbuilddata
+CreateBuildDirectory /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade.xcodeproj
+    builtin-create-build-directory /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym
+
+CreateBuildDirectory /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade.xcodeproj
+    builtin-create-build-directory /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj
+
+ClangStatCache /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.5.sdk /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/C/com.apple.DeveloperTools/16.4-16F6/Xcode/SDKStatCaches.noindex/iphoneos18.5-22F76-a529daf784b3616c7c04a36aeb7f5c05.sdkstatcache
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade.xcodeproj
+    /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang-stat-cache /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.5.sdk -o /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/C/com.apple.DeveloperTools/16.4-16F6/Xcode/SDKStatCaches.noindex/iphoneos18.5-22F76-a529daf784b3616c7c04a36aeb7f5c05.sdkstatcache
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade-15824f44f93cc326bb7f47fc07d8d97f-VFS-iphoneos/all-product-headers.yaml
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade.xcodeproj
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade-15824f44f93cc326bb7f47fc07d8d97f-VFS-iphoneos/all-product-headers.yaml
+
+CreateBuildDirectory /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade.xcodeproj
+    builtin-create-build-directory /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos
+
+CreateBuildDirectory /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/EagerLinkingTBDs/Release-iphoneos
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade.xcodeproj
+    builtin-create-build-directory /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/EagerLinkingTBDs/Release-iphoneos
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade_const_extract_protocols.json (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade_const_extract_protocols.json
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.SwiftFileList (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.SwiftFileList
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.SwiftConstValuesFileList (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.SwiftConstValuesFileList
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.LinkFileList (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.LinkFileList
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade-OutputFileMap.json (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade-OutputFileMap.json
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade.hmap (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade.hmap
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade.DependencyStaticMetadataFileList (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade.DependencyStaticMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade.DependencyMetadataFileList (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade.DependencyMetadataFileList
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-project-headers.hmap (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-project-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-own-target-headers.hmap (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-own-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-generated-files.hmap (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-generated-files.hmap
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-all-target-headers.hmap (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-all-target-headers.hmap
+
+WriteAuxiliaryFile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-all-non-framework-target-headers.hmap (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    write-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-all-non-framework-target-headers.hmap
+
+MkDir /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/NonameDecade.app (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    /bin/mkdir -p /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/NonameDecade.app
+
+MkDir /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_output/unthinned (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    /bin/mkdir -p /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_output/unthinned
+
+MkDir /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_output/thinned (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    /bin/mkdir -p /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_output/thinned
+
+GenerateAssetSymbols /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Assets.xcassets (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    /Applications/Xcode_16.4.app/Contents/Developer/usr/bin/actool /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Assets.xcassets --compile /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/NonameDecade.app --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_dependencies --output-partial-info-plist /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_generated_info.plist --app-icon AppIcon --compress-pngs --enable-on-demand-resources YES --development-region en --target-device ipad --minimum-deployment-target 15.0 --platform iphoneos --bundle-identifier online.nonamekill.decade --generate-swift-asset-symbol-extensions NO --generate-swift-asset-symbols /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols.swift --generate-objc-asset-symbols /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols.h --generate-asset-symbol-index /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/* com.apple.actool.compilation-results */
+/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols-Index.plist
+/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols.h
+/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols.swift
+
+
+CpResource /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/NonameDecade.app/Web /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Web (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    builtin-copy -exclude .DS_Store -exclude CVS -exclude .svn -exclude .git -exclude .hg -resolve-src-symlinks /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Web /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/NonameDecade.app
+
+CompileAssetCatalogVariant thinned /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/NonameDecade.app /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Assets.xcassets (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    /Applications/Xcode_16.4.app/Contents/Developer/usr/bin/actool /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Assets.xcassets --compile /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_output/thinned --output-format human-readable-text --notices --warnings --export-dependency-info /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_dependencies_thinned --output-partial-info-plist /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/assetcatalog_generated_info.plist_thinned --app-icon AppIcon --compress-pngs --enable-on-demand-resources YES --development-region en --target-device ipad --minimum-deployment-target 15.0 --platform iphoneos
+
+SwiftDriver NonameDecade normal arm64 com.apple.xcode.tools.swift.compiler (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    builtin-SwiftDriver -- /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name NonameDecade -O -whole-module-optimization -enforce-exclusivity\=checked @/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.SwiftFileList -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.5.sdk -target arm64-apple-ios15.0 -g -Xfrontend -serialize-debugging-options -swift-version 5 -I /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos -F /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos -c -num-threads 3 -Xcc -ivfsstatcache -Xcc /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/C/com.apple.DeveloperTools/16.4-16F6/Xcode/SDKStatCaches.noindex/iphoneos18.5-22F76-a529daf784b3616c7c04a36aeb7f5c05.sdkstatcache -output-file-map /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.swiftmodule -validate-clang-modules-once -clang-build-session-file /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/C/org.llvm.clang/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-generated-files.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-own-target-headers.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-project-headers.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/include -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade-Swift.h -working-directory /Users/runner/work/noname-ipad/noname-ipad/ios -no-emit-module-separately-wmo
+
+SwiftCompile normal arm64 Compiling\ AppDelegate.swift,\ GameMirror.swift,\ GameViewController.swift,\ InstallerViewController.swift,\ LocalHTTPServer.swift,\ NativeBridge.swift,\ Paths.swift,\ RootViewController.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/AppDelegate.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameMirror.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/InstallerViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/LocalHTTPServer.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/NativeBridge.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/Paths.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/RootViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'NonameDecade' from project 'NonameDecade')
+Failed frontend command:
+/Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift-frontend -frontend -c /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/AppDelegate.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameMirror.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/InstallerViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/LocalHTTPServer.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/NativeBridge.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/Paths.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/RootViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols.swift -supplementary-output-file-map /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/supplementaryOutputs-1 -target arm64-apple-ios15.0 -Xllvm -aarch64-use-tbi -enable-objc-interop -stack-check -sdk /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.5.sdk -I /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos -F /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos -no-color-diagnostics -g -debug-info-format\=dwarf -dwarf-version\=4 -swift-version 5 -enforce-exclusivity\=checked -O -serialize-debugging-options -const-gather-protocols-file /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade_const_extract_protocols.json -enable-experimental-feature DebugDescriptionMacro -enable-bare-slash-regex -empty-abi-descriptor -validate-clang-modules-once -clang-build-session-file /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/C/org.llvm.clang/ModuleCache.noindex/Session.modulevalidation -Xcc -working-directory -Xcc /Users/runner/work/noname-ipad/noname-ipad/ios -resource-dir /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift -file-compilation-dir /Users/runner/work/noname-ipad/noname-ipad/ios -Xcc -ivfsstatcache -Xcc /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/C/com.apple.DeveloperTools/16.4-16F6/Xcode/SDKStatCaches.noindex/iphoneos18.5-22F76-a529daf784b3616c7c04a36aeb7f5c05.sdkstatcache -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/swift-overrides.hmap -Xcc -iquote -Xcc /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-generated-files.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-own-target-headers.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-project-headers.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/include -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources -module-name NonameDecade -frontend-parseable-output -disable-clang-spi -target-sdk-version 18.5 -target-sdk-name iphoneos18.5 -external-plugin-path /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/lib/swift/host/plugins\#/Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server -external-plugin-path /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/local/lib/swift/host/plugins\#/Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/usr/bin/swift-plugin-server -in-process-plugin-server-path /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/libSwiftInProcPluginServer.dylib -plugin-path /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/lib/swift/host/plugins -plugin-path /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/local/lib/swift/host/plugins -enable-default-cmo -num-threads 3 -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/AppDelegate.o -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/GameMirror.o -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/GameViewController.o -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/InstallerViewController.o -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/LocalHTTPServer.o -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NativeBridge.o -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/Paths.o -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/RootViewController.o -o /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/GeneratedAssetSymbols.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/AppDelegate.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/GameMirror.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/GameViewController.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/InstallerViewController.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/LocalHTTPServer.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NativeBridge.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/Paths.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/RootViewController.o -index-unit-output-path /NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/GeneratedAssetSymbols.o
+
+CompileSwift normal arm64 (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/LocalHTTPServer.swift:365:2: error: unterminated '/*' comment
+}
+ ^
+ */
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/LocalHTTPServer.swift:1:1: note: comment started here
+/*
+^
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/NativeBridge.swift:279:2: error: unterminated '/*' comment
+}
+ ^
+ */
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/NativeBridge.swift:1:1: note: comment started here
+/*
+^
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameMirror.swift:110:49: error: contextual closure type '(URL, String) throws -> URL' expects 2 arguments, but 1 was used in closure body
+                let url = dirs.reduce(gameRoot) { $0.appendingPathComponent(d) }
+                                                ^
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:15:25: error: cannot find type 'LocalHTTPServer' in scope
+    private var server: LocalHTTPServer?
+                        ^~~~~~~~~~~~~~~
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:16:25: error: cannot find type 'NativeBridge' in scope
+    private var bridge: NativeBridge?
+                        ^~~~~~~~~~~~
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:45:22: error: cannot find 'NativeBridge' in scope
+        let bridge = NativeBridge(gameRoot: Paths.gameRoot)
+                     ^~~~~~~~~~~~
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:46:50: error: cannot infer type of closure parameter 'show' without a type annotation
+        bridge.setStatusBarHandler { [weak self] show in
+                                                 ^
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:50:56: error: cannot find 'NativeBridge' in scope
+        config.userContentController.add(bridge, name: NativeBridge.handlerName)
+                                                       ^~~~~~~~~~~~
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:88:22: error: cannot find 'LocalHTTPServer' in scope
+        let server = LocalHTTPServer(port: port, webRoot: Paths.webRoot, gameRoot: Paths.gameRoot)
+                     ^~~~~~~~~~~~~~~
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:92:36: error: cannot infer type of closure parameter 'result' without a type annotation
+        server.start { [weak self] result in
+                                   ^
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:107:32: error: cannot infer contextual base in reference to member 'reloadIgnoringLocalCacheData'
+        request.cachePolicy = .reloadIgnoringLocalCacheData
+                              ~^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift:118:90: error: cannot find 'NativeBridge' in scope
+        webView?.configuration.userContentController.removeScriptMessageHandler(forName: NativeBridge.handlerName)
+                                                                                         ^~~~~~~~~~~~
+
+SwiftDriver\ Compilation NonameDecade normal arm64 com.apple.xcode.tools.swift.compiler (in target 'NonameDecade' from project 'NonameDecade')
+    cd /Users/runner/work/noname-ipad/noname-ipad/ios
+    builtin-Swift-Compilation -- /Applications/Xcode_16.4.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swiftc -module-name NonameDecade -O -whole-module-optimization -enforce-exclusivity\=checked @/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.SwiftFileList -enable-bare-slash-regex -enable-experimental-feature DebugDescriptionMacro -sdk /Applications/Xcode_16.4.app/Contents/Developer/Platforms/iPhoneOS.platform/Developer/SDKs/iPhoneOS18.5.sdk -target arm64-apple-ios15.0 -g -Xfrontend -serialize-debugging-options -swift-version 5 -I /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos -F /Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos -c -num-threads 3 -Xcc -ivfsstatcache -Xcc /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/C/com.apple.DeveloperTools/16.4-16F6/Xcode/SDKStatCaches.noindex/iphoneos18.5-22F76-a529daf784b3616c7c04a36aeb7f5c05.sdkstatcache -output-file-map /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade-OutputFileMap.json -use-frontend-parseable-output -save-temps -no-color-diagnostics -serialize-diagnostics -emit-dependencies -emit-module -emit-module-path /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade.swiftmodule -validate-clang-modules-once -clang-build-session-file /var/folders/nj/vtw8zd2j31d1gdrtntc5y4600000gn/C/org.llvm.clang/ModuleCache.noindex/Session.modulevalidation -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/swift-overrides.hmap -emit-const-values -Xfrontend -const-gather-protocols-file -Xfrontend /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade_const_extract_protocols.json -Xcc -iquote -Xcc /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-generated-files.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-own-target-headers.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-all-target-headers.hmap -Xcc -iquote -Xcc /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/NonameDecade-project-headers.hmap -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/sym/Release-iphoneos/include -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources-normal/arm64 -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/arm64 -Xcc -I/Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources -emit-objc-header -emit-objc-header-path /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/Objects-normal/arm64/NonameDecade-Swift.h -working-directory /Users/runner/work/noname-ipad/noname-ipad/ios -no-emit-module-separately-wmo
+
+** BUILD FAILED **
+
+
+The following build commands failed:
+	SwiftCompile normal arm64 Compiling\ AppDelegate.swift,\ GameMirror.swift,\ GameViewController.swift,\ InstallerViewController.swift,\ LocalHTTPServer.swift,\ NativeBridge.swift,\ Paths.swift,\ RootViewController.swift,\ GeneratedAssetSymbols.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/AppDelegate.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameMirror.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/GameViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/InstallerViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/LocalHTTPServer.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/NativeBridge.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/Paths.swift /Users/runner/work/noname-ipad/noname-ipad/ios/NonameDecade/Sources/RootViewController.swift /Users/runner/work/noname-ipad/noname-ipad/ios/build/obj/NonameDecade.build/Release-iphoneos/NonameDecade.build/DerivedSources/GeneratedAssetSymbols.swift (in target 'NonameDecade' from project 'NonameDecade')
+	CompileSwift normal arm64 (in target 'NonameDecade' from project 'NonameDecade')
+(2 failures)
