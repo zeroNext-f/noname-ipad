@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<!--
+    无名杀十周年版 —— iPad 移植启动器（壳）
+    与 Android 原版 assets/www/index.html 等价，仅额外引入平台垫片。
+-->
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="user-scalable=no, viewport-fit=cover">
+    <link rel="stylesheet" href="css/color.css">
+    <title>无名杀十周年版</title>
+</head>
+<body>
+    <!-- 平台垫片：必须在 js/index.js 之前，补齐 cordova / jsBridge 等原生能力 -->
+    <script src="__shim.js"></script>
+    <script src="js/index.js"></script>
+</body>
+</html>

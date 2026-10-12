@@ -1,0 +1,64 @@
+name: NonameDecade
+options:
+  bundleIdPrefix: online.nonamekill
+  deploymentTarget:
+    iOS: "15.0"
+  createIntermediateGroups: true
+  groupSortPosition: top
+
+settings:
+  base:
+    SWIFT_VERSION: "5.9"
+    ENABLE_BITCODE: "NO"
+    SWIFT_OPTIMIZATION_LEVEL: "-O"
+
+targets:
+  NonameDecade:
+    type: application
+    platform: iOS
+    deploymentTarget: "15.0"
+
+    sources:
+      - path: NonameDecade/Sources
+      - path: NonameDecade/LaunchScreen.storyboard
+      - path: NonameDecade/Assets.xcassets
+      - path: NonameDecade/Web
+        type: folder
+        buildPhase: resources
+
+    info:
+      path: NonameDecade/Info.plist
+      properties:
+        CFBundleDisplayName: "无名杀十周年版"
+        CFBundleName: NonameDecade
+        CFBundleShortVersionString: "1.12.7"
+        CFBundleVersion: "1"
+        LSRequiresIPhoneOS: true
+        UIRequiresFullScreen: true
+        UIViewControllerBasedStatusBarAppearance: true
+        UILaunchStoryboardName: LaunchScreen
+        UIFileSharingEnabled: true
+        LSSupportsOpeningDocumentsInPlace: true
+        ITSAppUsesNonExemptEncryption: false
+        UIApplicationSupportsIndirectInputEvents: true
+        CADisableMinimumFrameDurationOnPhone: true
+        UIStatusBarStyle: UIStatusBarStyleLightContent
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        NSAppTransportSecurity:
+          NSAllowsLocalNetworking: true
+          NSAllowsArbitraryLoadsInWebContent: true
+
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: online.nonamekill.decade
+        TARGETED_DEVICE_FAMILY: "2"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        CODE_SIGN_STYLE: Manual
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGN_IDENTITY: ""
+        DEVELOPMENT_TEAM: ""
+        ENABLE_USER_SCRIPT_SANDBOXING: "NO"
