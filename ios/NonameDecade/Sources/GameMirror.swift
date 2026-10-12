@@ -107,7 +107,7 @@ final class GameMirror {
         let total = files.count
         if let dirs = manifest.dirs {
             for d in dirs {
-                let url = dirs.reduce(gameRoot) { $0.appendingPathComponent(d) }
+                let url = localURL(d)
                 try? FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
             }
         }
@@ -159,7 +159,13 @@ final class GameMirror {
     }
 
     private func localURL(_ rel: String) -> URL {
-        rel.split(separator: "/").reduce(gameRoot) { $0.appendingPathComponent(String($1)) }
+        // 不用 reduce 的简写闭包：在 2 参数上下文里只用 $0 会被判为"少用了一个参数"。
+        // 显式循环最稳，也最直观。
+        var url = gameRoot
+        for comp in rel.split(separator: "/") {
+            url.appendPathComponent(String(comp))
+        }
+        return url
     }
 
     private func shouldSkip(_ entry: Entry) -> Bool {

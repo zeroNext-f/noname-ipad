@@ -10,10 +10,10 @@
  *   用 http://127.0.0.1:<port>/ 是最稳的做法：同源、可 XHR、存储正常。
  *
  * 路由规则（与桌面验证服务器一致）：
- *   /               -> Bundle 内 Web/index.html
- *   /__shim.js      -> Bundle 内 Web/__shim.js
- *   /js /css /img /cordova.js 等 -> Bundle 内 Web/*
- *   /game /image /audio ...      -> Documents/noname/*
+ *   /               -> Bundle 内 Web 目录的 index.html
+ *   /__shim.js      -> Bundle 内 Web 目录的 __shim.js
+ *   /js /css /img /cordova.js 等 -> Bundle 内 Web 目录下对应文件
+ *   /game /image /audio ...      -> Documents/noname 目录下对应文件
  *
  * 只监听 127.0.0.1（loopback），不对外暴露。
  */

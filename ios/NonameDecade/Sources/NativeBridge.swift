@@ -1,7 +1,7 @@
 /*
  * 无名杀 iPad 移植 —— 原生桥
  * ==================================================================
- * 桌面端这套桥走 HTTP /__bridge/*，iOS 端改走 WKScriptMessageHandler，
+ * 桌面端这套桥走 HTTP 的 __bridge 接口，iOS 端改走 WKScriptMessageHandler，
  * 但「方法名 + 参数 + 返回结构」完全一致，因此垫片 JS 无需改动。
  */
 import Foundation

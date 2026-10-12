@@ -104,7 +104,8 @@ final class InstallerViewController: UIViewController {
         logView.layer.cornerRadius = 8
         logView.text = ""
 
-        for v in [titleLabel, descLabel, urlField, startButton, progress, statusLabel, logView] {
+        let allViews: [UIView] = [titleLabel, descLabel, urlField, startButton, progress, statusLabel, logView]
+        for v in allViews {
             v.translatesAutoresizingMaskIntoConstraints = false
             content.addSubview(v)
         }
