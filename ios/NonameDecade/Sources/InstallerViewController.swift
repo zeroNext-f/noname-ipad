@@ -196,8 +196,11 @@ final class InstallerViewController: UIViewController {
     }
 
     private func finishWithError() {
-        startButton.isEnabled = true
-        startButton.alpha = 1
+        // 这个函数可能从 URLSession 的后台回调里被调用，必须切回主线程改 UI
+        DispatchQueue.main.async {
+            self.startButton.isEnabled = true
+            self.startButton.alpha = 1
+        }
     }
 
     private func normalizedURL() -> URL? {

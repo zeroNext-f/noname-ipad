@@ -19,6 +19,9 @@ final class GameViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        NativeBridge.appendDebugLog("[native] === App 启动，开始加载游戏界面 ===")
+        NativeBridge.appendDebugLog("[native] 游戏目录 = \(Paths.gameRoot.path)")
+        NativeBridge.appendDebugLog("[native] Web 壳 = \(Paths.webRoot?.path ?? "nil")")
         view.backgroundColor = .black
         setupWebView()
         startServerAndLoad(ports: Array(Paths.httpPort...(Paths.httpPort + 9)))
@@ -90,19 +93,28 @@ final class GameViewController: UIViewController {
         self.server = server
 
         server.start { [weak self] result in
-            guard let self = self else { return }
-            switch result {
-            case .success:
-                self.loadGame()
-            case .failure:
-                self.server?.stop()
-                self.startServerAndLoad(ports: Array(ports.dropFirst()))
+            // ⚠️ 关键：NWListener 的 stateUpdateHandler 在后台队列上被调用，
+            //    而 WKWebView / UIKit 必须在主线程操作，否则 WebKit 会
+            //    直接 WTFCrashWithInfo → EXC_BREAKPOINT（表现为启动即闪退）。
+            DispatchQueue.main.async {
+                guard let self = self else { return }
+                switch result {
+                case .success:
+                    self.loadGame()
+                case .failure:
+                    self.server?.stop()
+                    self.startServerAndLoad(ports: Array(ports.dropFirst()))
+                }
             }
         }
     }
 
     private func loadGame() {
-        guard let url = URL(string: "http://127.0.0.1:\(server?.port ?? Paths.httpPort)/") else { return }
+        guard let url = URL(string: "http://127.0.0.1:\(server?.port ?? Paths.httpPort)/") else {
+            NativeBridge.appendDebugLog("[native] 无法构造本地 URL")
+            return
+        }
+        NativeBridge.appendDebugLog("[native] 本地服务就绪，开始加载 \(url.absoluteString)")
         var request = URLRequest(url: url)
         request.cachePolicy = .reloadIgnoringLocalCacheData
         webView.load(request)
@@ -125,11 +137,17 @@ final class GameViewController: UIViewController {
 extension GameViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+        NativeBridge.appendDebugLog("[native] 加载失败: \(error.localizedDescription)")
         NSLog("[noname] navigation failed: %@", error.localizedDescription)
     }
 
     func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+        NativeBridge.appendDebugLog("[native] 预加载失败: \(error.localizedDescription)")
         NSLog("[noname] provisional navigation failed: %@", error.localizedDescription)
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        NativeBridge.appendDebugLog("[native] 页面加载完成")
     }
 
     func webView(_ webView: WKWebView,

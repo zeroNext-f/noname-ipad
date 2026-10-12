@@ -101,6 +101,11 @@ final class NativeBridge: NSObject, WKScriptMessageHandler {
             DispatchQueue.main.async { self.didNotifyStatusBar?(show) }
             done(["ok": true])
 
+        // WebView 里的 console 输出 / 未捕获异常，落到 Documents/noname-debug.log
+        case "log":
+            NativeBridge.appendDebugLog((args["text"] as? String) ?? "")
+            done(["ok": true])
+
         case "exitApp":
             done(["ok": true])
 
@@ -245,6 +250,38 @@ final class NativeBridge: NSObject, WKScriptMessageHandler {
             }
         }
         task.resume()
+    }
+
+    // MARK: - 调试日志
+    // 写到 App 沙盒的 Documents/noname-debug.log。
+    // 排查问题时用「爱思助手 → 我的设备 → 应用 → 无名杀十周年版 → 浏览」
+    // 进入 Documents 把这个文件导出来即可，无需 Xcode。
+
+    private static let debugLogLock = NSLock()
+
+    static func appendDebugLog(_ text: String) {
+        guard !text.isEmpty else { return }
+        debugLogLock.lock()
+        defer { debugLogLock.unlock() }
+
+        let url = Paths.documents.appendingPathComponent("noname-debug.log")
+        let df = DateFormatter()
+        df.dateFormat = "HH:mm:ss.SSS"
+        var payload = ""
+        for line in text.split(separator: "\n", omittingEmptySubsequences: false) {
+            payload += "[\(df.string(from: Date()))] \(line)\n"
+        }
+        guard let data = payload.data(using: .utf8) else { return }
+
+        if let fh = try? FileHandle(forWritingTo: url) {
+            defer { try? fh.close() }
+            if let end = try? fh.seekToEnd() {
+                _ = end
+                try? fh.write(contentsOf: data)
+            }
+        } else {
+            try? data.write(to: url, options: .atomic)
+        }
     }
 
     // MARK: - JS 字符串转义

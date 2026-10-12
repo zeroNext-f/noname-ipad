@@ -55,3 +55,79 @@
 
   console.log('[native-transport] ready');
 }());
+
+/* ==================================================================
+ * 调试日志桥
+ * ------------------------------------------------------------------
+ * 把 WebView 里的 console 输出 / 未捕获异常转发给原生，
+ * 原生追加写入 App 的 Documents/noname-debug.log。
+ * 这样出问题时可以用爱思助手把日志导出来，在电脑上直接看原因，
+ * 不需要 Xcode / Safari 网页检查器。
+ * ================================================================== */
+(function () {
+  'use strict';
+  if (window.__NONAME_LOG_BRIDGE__) return;
+  window.__NONAME_LOG_BRIDGE__ = true;
+  if (typeof window.__nonameInvoke !== 'function') return;
+
+  var buf = [];
+  var MAX_BUF = 120;
+
+  function flush() {
+    if (!buf.length) return;
+    var text = buf.join('\n');
+    buf = [];
+    try {
+      window.__nonameInvoke('log', { text: text }).catch(function () {});
+    } catch (e) { /* 忽略 */ }
+  }
+
+  function fmt(a) {
+    try {
+      if (typeof a === 'string') return a;
+      if (a instanceof Error) return a.stack || (a.name + ': ' + a.message);
+      return JSON.stringify(a);
+    } catch (e) {
+      try { return String(a); } catch (e2) { return '?'; }
+    }
+  }
+
+  function wrap(level, orig) {
+    return function () {
+      try {
+        var parts = [];
+        for (var i = 0; i < arguments.length; i++) parts.push(fmt(arguments[i]));
+        buf.push('[' + level + '] ' + parts.join(' '));
+        if (buf.length >= MAX_BUF) flush();
+      } catch (e) { /* 绝不因为日志本身出错 */ }
+      try { return orig.apply(console, arguments); } catch (e) {}
+    };
+  }
+
+  console.log   = wrap('log',   console.log.bind(console));
+  console.warn  = wrap('warn',  console.warn.bind(console));
+  console.error = wrap('error', console.error.bind(console));
+  console.info  = wrap('info',  console.info.bind(console));
+
+  window.addEventListener('error', function (e) {
+    try {
+      buf.push('[window.onerror] ' + (e.message || '') +
+               ' @ ' + (e.filename || '?') + ':' + (e.lineno || '?') + ':' + (e.colno || '?'));
+      if (e.error && e.error.stack) buf.push('[stack] ' + e.error.stack);
+      flush();
+    } catch (x) {}
+  });
+
+  window.addEventListener('unhandledrejection', function (e) {
+    try {
+      var r = e.reason;
+      buf.push('[unhandledrejection] ' + fmt(r));
+      if (r && r.stack) buf.push('[stack] ' + r.stack);
+      flush();
+    } catch (x) {}
+  });
+
+  setInterval(flush, 1000);
+  window.addEventListener('pagehide', flush);
+  flush();
+}());

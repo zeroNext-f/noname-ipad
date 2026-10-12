@@ -40,9 +40,14 @@ final class LocalHTTPServer {
 
     // MARK: - 生命周期
 
-    /// 启动；成功/失败通过 completion 回调（端口被占用会以 failure 返回，便于换端口重试）
+    /// 启动；成功/失败通过 completion 回调。
+    /// ⚠️ completion 一律在主线程回调（NWListener 的状态回调本身在后台队列上，
+    ///    调用方通常会去操作 WKWebView / UIKit，必须在主线程）。
     func start(completion: @escaping (Result<UInt16, Error>) -> Void) {
-        guard listener == nil else { completion(.success(port)); return }
+        guard listener == nil else {
+            DispatchQueue.main.async { completion(.success(self.port)) }
+            return
+        }
         self.startCompletion = completion
 
         let params = NWParameters.tcp
@@ -50,8 +55,9 @@ final class LocalHTTPServer {
         params.acceptLocalOnly = true
 
         guard let nwPort = NWEndpoint.Port(rawValue: port) else {
-            completion(.failure(NSError(domain: "noname", code: 1,
-                                        userInfo: [NSLocalizedDescriptionKey: "非法端口 \(port)"])))
+            let err = NSError(domain: "noname", code: 1,
+                              userInfo: [NSLocalizedDescriptionKey: "非法端口 \(port)"])
+            DispatchQueue.main.async { completion(.failure(err)) }
             return
         }
 
@@ -59,7 +65,7 @@ final class LocalHTTPServer {
         do {
             l = try NWListener(using: params, on: nwPort)
         } catch {
-            completion(.failure(error))
+            DispatchQueue.main.async { completion(.failure(error)) }
             return
         }
 
@@ -74,14 +80,15 @@ final class LocalHTTPServer {
                 self.isRunning = true
                 self.onLog?("http server ready on 127.0.0.1:\(self.port)")
                 self.startCompletion = nil
-                done?(.success(self.port))
+                let p = self.port
+                DispatchQueue.main.async { done?(.success(p)) }
             case .failed(let err):
                 self.isRunning = false
                 self.onLog?("http server failed: \(err)")
                 self.listener?.cancel()
                 self.listener = nil
                 self.startCompletion = nil
-                done?(.failure(err))
+                DispatchQueue.main.async { done?(.failure(err)) }
             default:
                 break
             }
