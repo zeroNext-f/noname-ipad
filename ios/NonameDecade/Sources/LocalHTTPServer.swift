@@ -305,7 +305,7 @@ final class LocalHTTPServer {
                 return
             }
             let want = min(chunkSize, remaining)
-            let chunk: Data?
+            var chunk: Data?
             do { chunk = try handle.read(upToCount: want) } catch { chunk = nil }
             guard let data = chunk, !data.isEmpty else {
                 try? handle.close()

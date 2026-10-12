@@ -12,6 +12,22 @@ settings:
     ENABLE_BITCODE: "NO"
     SWIFT_OPTIMIZATION_LEVEL: "-O"
 
+# 显式声明 scheme：xcodebuild -scheme 需要它真实存在，
+# 不能依赖 Xcode 打开工程时自动创建（CI 是无头环境）。
+schemes:
+  NonameDecade:
+    build:
+      targets:
+        NonameDecade: all
+    run:
+      config: Debug
+    profile:
+      config: Release
+    analyze:
+      config: Debug
+    archive:
+      config: Release
+
 targets:
   NonameDecade:
     type: application
@@ -20,7 +36,6 @@ targets:
 
     sources:
       - path: NonameDecade/Sources
-      - path: NonameDecade/LaunchScreen.storyboard
       - path: NonameDecade/Assets.xcassets
       - path: NonameDecade/Web
         type: folder
@@ -36,7 +51,9 @@ targets:
         LSRequiresIPhoneOS: true
         UIRequiresFullScreen: true
         UIViewControllerBasedStatusBarAppearance: true
-        UILaunchStoryboardName: LaunchScreen
+        # 用 plist 形式的启动屏（iOS 14+），不依赖 storyboard，
+        # 既避免 ibtool 编译风险，也能保证 iPad 全屏不受黑边影响。
+        UILaunchScreen: {}
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         ITSAppUsesNonExemptEncryption: false

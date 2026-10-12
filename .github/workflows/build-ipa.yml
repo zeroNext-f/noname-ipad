@@ -43,12 +43,19 @@ jobs:
         run: |
           brew update --quiet || true
           brew install xcodegen
+          xcodegen --version
 
       - name: 生成 Xcode 工程
         working-directory: ios
-        run: xcodegen generate
+        run: |
+          xcodegen generate
+          echo "---- 工程内容 ----"
+          ls -la
+          echo "---- 可用的 scheme / target ----"
+          xcodebuild -list -project NonameDecade.xcodeproj
 
       - name: 构建（不签名）
+        id: build
         working-directory: ios
         run: |
           set -o pipefail
@@ -56,7 +63,6 @@ jobs:
             -project NonameDecade.xcodeproj \
             -scheme NonameDecade \
             -configuration Release \
-            -sdk iphoneos \
             -destination 'generic/platform=iOS' \
             -derivedDataPath build \
             CODE_SIGNING_ALLOWED=NO \
@@ -64,35 +70,70 @@ jobs:
             CODE_SIGN_IDENTITY="" \
             CODE_SIGN_ENTITLEMENTS="" \
             ONLY_ACTIVE_ARCH=NO \
-            build
+            build 2>&1 | tee build.log
 
-      - name: 校验产物
+      # 关键排障步骤：把编译错误以 annotation 形式抛出来。
+      # annotation 无需登录即可通过 GitHub API 读取，便于远程定位问题。
+      - name: 失败时暴露错误明细
+        if: failure()
         working-directory: ios
         run: |
-          APP="build/Build/Products/Release-iphoneos/NonameDecade.app"
-          test -d "$APP" || { echo "未生成 .app"; exit 1; }
+          echo "================= 关键错误行 ================="
+          if [ -f build.log ]; then
+            grep -nE "error:|fatal error:|xcodebuild: error|does not contain a scheme|The following build commands failed|Command .* failed|Undefined symbol|not found" build.log | head -40 || true
+            echo "================= build.log 末尾 100 行 ================="
+            tail -100 build.log || true
+            echo "================= 抛成注解 ================="
+            grep -nE "error:|fatal error:|xcodebuild: error|does not contain a scheme|The following build commands failed" build.log \
+              | head -20 \
+              | while IFS= read -r line; do
+                  safe=$(printf '%s' "$line" | tr -d '\r' | head -c 900)
+                  echo "::error::${safe}"
+                done
+          else
+            echo "::error::没有生成 build.log —— 构建根本没开始，可能是 scheme 或工程生成有问题"
+          fi
+
+      - name: 定位产物
+        if: success()
+        working-directory: ios
+        run: |
+          echo "== 搜索 .app =="
+          find build -name "*.app" -maxdepth 6 -type d || true
+          APP=$(find build -name "NonameDecade.app" -type d | head -1)
+          echo "APP=$APP" >> "$GITHUB_ENV"
+          echo "解析到：$APP"
+
+      - name: 校验产物
+        if: success()
+        working-directory: ios
+        run: |
+          APP="${{ env.APP }}"
+          test -n "$APP" || { echo "::error::没有找到 NonameDecade.app"; exit 1; }
+          test -d "$APP" || { echo "::error::app 路径无效: $APP"; exit 1; }
           echo "== 关键文件 =="
-          ls -la "$APP" | head -40
-          test -f "$APP/Web/__shim.js" || { echo "缺少 Web/__shim.js"; exit 1; }
-          test -f "$APP/Web/__native.js" || { echo "缺少 Web/__native.js"; exit 1; }
-          test -f "$APP/Web/index.html" || { echo "缺少 Web/index.html"; exit 1; }
-          test -f "$APP/LaunchScreen.storyboardc/Info.plist" || echo "警告：未找到 LaunchScreen.storyboardc"
+          ls -la "$APP"
+          test -f "$APP/Web/__shim.js" || { echo "::error::缺少 Web/__shim.js"; exit 1; }
+          test -f "$APP/Web/__native.js" || { echo "::error::缺少 Web/__native.js"; exit 1; }
+          test -f "$APP/Web/index.html" || { echo "::error::缺少 Web/index.html"; exit 1; }
           echo "== 架构 =="
           lipo -info "$APP/NonameDecade"
           echo "== 体积 =="
           du -sh "$APP"
 
       - name: 打包未签名 IPA
+        if: success()
         working-directory: ios
         run: |
           rm -rf Payload NonameDecade-unsigned.ipa
           mkdir -p Payload
-          cp -R build/Build/Products/Release-iphoneos/NonameDecade.app Payload/
+          cp -R "${{ env.APP }}" Payload/
           zip -qry NonameDecade-unsigned.ipa Payload
           ls -lh NonameDecade-unsigned.ipa
           shasum -a 256 NonameDecade-unsigned.ipa | tee NonameDecade-unsigned.ipa.sha256
 
       - name: 上传 IPA
+        if: success()
         uses: actions/upload-artifact@v4
         with:
           name: NonameDecade-unsigned-ipa
@@ -102,12 +143,12 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: 构建失败时收集日志
+      - name: 失败时保留构建日志
         if: failure()
         uses: actions/upload-artifact@v4
         with:
           name: build-logs
           path: |
-            ~/Library/Logs/xcodebuild/*.log
+            ios/build.log
             ios/build/Logs/**
           if-no-files-found: ignore

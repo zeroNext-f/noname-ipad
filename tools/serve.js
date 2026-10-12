@@ -50,6 +50,20 @@ const MIME = {
 
 function mime(p) { return MIME[path.extname(p).toLowerCase()] || 'application/octet-stream'; }
 
+/* --------------------------- 访问日志 ---------------------------
+ * --lan 模式下，每一条请求都会打印并追加写入 lan-access.log。
+ * 用途：在平板上访问时，电脑这边能立刻看出「请求到底有没有到」。
+ *   - 日志里出现来自平板 IP 的记录  → 网络通，问题在浏览器侧（例如用了 HTTPS）
+ *   - 日志里什么都没有              → 网络没通（AP 隔离 / 防火墙 / 网段不对）
+ */
+const LOG_FILE = LAN ? path.join(__dirname, '..', 'lan-access.log') : null;
+function accessLog(req) {
+  const ip = String(req.socket.remoteAddress || '').replace(/^::ffff:/, '');
+  const line = `${new Date().toISOString()}  ${ip.padEnd(15)}  ${req.method} ${req.url}`;
+  console.log('  ' + line);
+  if (LOG_FILE) { try { fs.appendFileSync(LOG_FILE, line + '\n'); } catch (e) { /* ignore */ } }
+}
+
 /** 防止 ../ 逃逸出游戏目录 */
 function safeJoin(root, rel) {
   const norm = path.normalize(rel).replace(/^([/\\])+/, '');
@@ -170,8 +184,16 @@ function serveFile(res, filePath, req) {
 const server = http.createServer(async (req, res) => {
   const u = new URL(req.url, `http://127.0.0.1:${PORT}`);
   const pathname = decodeURIComponent(u.pathname);
+  accessLog(req);
 
   try {
+    // ---- 连通性探针（平板侧最快验证方式）----
+    if (pathname === '/__ping') {
+      const body = Buffer.from('noname-lan-ok', 'utf8');
+      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Content-Length': body.length });
+      return res.end(body);
+    }
+
     // ---- 原生桥 ----
     if (pathname.startsWith('/__bridge/')) {
       const method = pathname.slice('/__bridge/'.length);

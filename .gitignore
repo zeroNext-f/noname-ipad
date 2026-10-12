@@ -13,6 +13,7 @@ xcuserdata/
 
 # 桌面验证产生的临时文件
 *.log
+lan-access.log
 
 # 系统
 .DS_Store

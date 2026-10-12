@@ -70,8 +70,16 @@ if ($pending) {
 # ---------- 4. 推送 ----------
 Write-Host ""
 Write-Host "正在推送 $Branch 到 GitHub …" -ForegroundColor Cyan
-$output = & git push -u origin $Branch 2>&1
+
+# 注意：git 会把进度信息写到 stderr。若此时 $ErrorActionPreference 仍是 Stop，
+# PowerShell 会把 git 的正常输出当成错误并中断脚本（推送其实已经成功）。
+# 所以这里临时切到 Continue，成败只用 $LASTEXITCODE 判定。
+$prevEAP = $ErrorActionPreference
+$ErrorActionPreference = 'Continue'
+$output = @(& git push -u origin $Branch 2>&1 | ForEach-Object { $_.ToString() })
 $code = $LASTEXITCODE
+$ErrorActionPreference = $prevEAP
+
 $output | ForEach-Object { Write-Host "  $_" }
 
 if ($code -ne 0) {
