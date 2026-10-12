@@ -55,6 +55,10 @@ targets:
         NSAppTransportSecurity:
           NSAllowsLocalNetworking: true
           NSAllowsArbitraryLoadsInWebContent: true
+        # iOS 14+ 第三方 App 访问局域网设备（如电脑上的 10.x / 192.168.x 地址）
+        # 必须声明这个键，系统才会弹窗请求「本地网络」权限。
+        # 缺少它会导致所有局域网连接被静默拒绝，报 "The Internet connection appears to be offline"。
+        NSLocalNetworkUsageDescription: "需要访问本地网络，以便从同一 Wi-Fi 下的电脑导入游戏数据（约 2.5 GB）。"
 
     settings:
       base:

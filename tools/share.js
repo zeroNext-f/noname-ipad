@@ -103,6 +103,31 @@ function sendJSON(res, obj) {
   res.end(body);
 }
 
+/* ---------------- 传输进度统计 ----------------
+ * 让用户在电脑上就能看到「iPad 到底传到哪了」。
+ * 只在关键节点打印，避免 2.5 万行刷屏。
+ */
+let served = 0;
+let servedBytes = 0;
+let lastReport = Date.now();
+let syncing = false;
+let TOTAL_BYTES = 1;
+
+function noteFile(bytes) {
+  served++;
+  servedBytes += bytes;
+  // 每 300 个文件，或每 10 秒，报一次进度
+  if (served % 300 === 0 || Date.now() - lastReport > 10000) {
+    lastReport = Date.now();
+    const pct = ((servedBytes / TOTAL_BYTES) * 100).toFixed(1);
+    process.stdout.write(
+      `  [进度] 已发送 ${String(served).padStart(6)} 个文件` +
+      ` / ${(servedBytes / 1024 / 1024 / 1024).toFixed(2)} GB` +
+      `  (约占总量 ${pct}%)\n`
+    );
+  }
+}
+
 function sendFile(res, full, req) {
   fs.stat(full, (err, st) => {
     if (err || !st.isFile()) {
@@ -114,6 +139,7 @@ function sendFile(res, full, req) {
       'Content-Length': st.size,
       'Cache-Control': 'no-cache',
     };
+    noteFile(st.size);
     res.writeHead(200, headers);
     if (req.method === 'HEAD') return res.end();
     fs.createReadStream(full).pipe(res);
@@ -125,6 +151,7 @@ function sendFile(res, full, req) {
   const t0 = Date.now();
   const manifest = await buildManifest();
   const totalBytes = manifest.files.reduce((s, f) => s + f.size, 0);
+  TOTAL_BYTES = totalBytes || 1;
   process.stdout.write(
     `扫描完成：${manifest.files.length} 个文件 / ${(totalBytes / 1024 / 1024 / 1024).toFixed(2)} GB` +
     `（${((Date.now() - t0) / 1000).toFixed(1)}s）\n`
@@ -134,6 +161,11 @@ function sendFile(res, full, req) {
     try {
       const pathname = decodeURIComponent((req.url || '/').split('?')[0]);
       if (pathname === '/__manifest' || pathname === '/__manifest.json') {
+        // 每次拉清单 = 一次同步开始，重置进度统计
+        served = 0; servedBytes = 0; lastReport = Date.now();
+        process.stdout.write(
+          `\n>>> iPad 开始同步（${new Date().toLocaleTimeString()}）\n`
+        );
         return sendJSON(res, manifest);
       }
       if (pathname === '/__ping') {
