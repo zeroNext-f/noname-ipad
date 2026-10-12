@@ -56,28 +56,44 @@ jobs:
           set -o pipefail
           xcodegen generate 2>&1 | tee xcodegen.log
 
-          # ---- objectVersion 兼容处理 ----
-          # 新版 XcodeGen 默认写 77（Xcode 16 格式）。若本机 Xcode 主版本 < 16，
-          # 就降级为 56，否则 xcodebuild 会报 "Unable to read project"。
-          PBX="NonameDecade.xcodeproj/project.pbxproj"
-          if [ -f "$PBX" ]; then
-            XCODE_MAJOR=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
-            OBJVER=$(grep -m1 -oE 'objectVersion = [0-9]+' "$PBX" | grep -oE '[0-9]+' || echo "?")
-            echo "本机 Xcode 主版本 = $XCODE_MAJOR ；生成工程的 objectVersion = $OBJVER" | tee -a xcodegen.log
-            if [ "$XCODE_MAJOR" -lt 16 ] 2>/dev/null && [ "$OBJVER" != "?" ] && [ "$OBJVER" -gt 56 ]; then
-              sed -i '' -E 's/objectVersion = [0-9]+;/objectVersion = 56;/' "$PBX"
-              echo "已把 objectVersion 降级为 56（适配 Xcode 15）" | tee -a xcodegen.log
-            fi
-            echo "--- project.pbxproj 头部 ---" | tee -a xcodegen.log
-            head -12 "$PBX" | tee -a xcodegen.log
-          else
-            echo "!! 没有生成 project.pbxproj" | tee -a xcodegen.log
-          fi
+      # 自检步骤：失败也不影响构建（continue-on-error）。
+      # 注意：绝对不要写 `xcodebuild ... | head -1`，
+      # head 提前关闭管道会让 xcodebuild 收到 EPIPE 并 SIGABRT(134)。
+      - name: 工程自检（诊断，失败不影响构建）
+        continue-on-error: true
+        working-directory: ios
+        run: |
+          {
+            echo ""
+            echo "==== 工程自检 ===="
+            xcodebuild -version || true
 
-          echo "--- 目录 ---" | tee -a xcodegen.log
-          ls -la | tee -a xcodegen.log
-          echo "--- xcodebuild -list ---" | tee -a xcodegen.log
-          xcodebuild -list -project NonameDecade.xcodeproj 2>&1 | tee -a xcodegen.log
+            PBX="NonameDecade.xcodeproj/project.pbxproj"
+            if [ ! -f "$PBX" ]; then
+              echo "!! 没有生成 $PBX"
+            else
+              XV=$(xcodebuild -version 2>/dev/null || true)
+              MAJ=$(printf '%s\n' "$XV" | awk 'NR==1 {print $2}' | cut -d. -f1)
+              OBJ=$(awk '/objectVersion/ {gsub(/[^0-9]/, "", $3); print $3; exit}' "$PBX" 2>/dev/null || true)
+              echo "Xcode 主版本 = ${MAJ:-?} ; 生成工程的 objectVersion = ${OBJ:-?}"
+
+              # 兼容兜底：Xcode < 16 读不了 objectVersion 77
+              if [ -n "$MAJ" ] && [ -n "$OBJ" ] && [ "$MAJ" -lt 16 ] && [ "$OBJ" -gt 56 ]; then
+                echo "本机 Xcode 过旧，把 objectVersion 降级为 56"
+                sed -i '' -E 's/objectVersion = [0-9]+;/objectVersion = 56;/' "$PBX" || true
+              fi
+
+              echo "---- project.pbxproj 头部 ----"
+              head -12 "$PBX" || true
+            fi
+
+            echo "---- 目录 ----"
+            ls -la || true
+
+            echo "---- xcodebuild -list ----"
+            xcodebuild -list -project NonameDecade.xcodeproj || true
+          } >> xcodegen.log 2>&1
+          echo "工程自检完成（详见 xcodegen.log）"
 
       - name: 构建（不签名）
         id: build
@@ -114,23 +130,24 @@ jobs:
             tail -100 "$f" || true
             echo ""
             echo "=========== $f 中的错误行 ==========="
-            grep -nE "error:|fatal error:|xcodebuild: error|Unable to read project|does not contain a scheme|The following build commands failed|Command .* failed|Undefined symbol|Unknown attribute|does not exist|Unexpected" "$f" | head -25 || true
+            grep -nE "error:|fatal error:|xcodebuild: error|Unable to read project|does not contain a scheme|The following build commands failed|Command .* failed|Undefined symbol|Unknown attribute|does not exist|Unexpected" "$f" 2>/dev/null | head -25 || true
             echo ""
             echo "=========== 抛成注解 ==========="
-            grep -nE "error:|fatal error:|xcodebuild: error|Unable to read project|does not contain a scheme|The following build commands failed|Unexpected|does not exist" "$f" \
+            grep -nE "error:|fatal error:|xcodebuild: error|Unable to read project|does not contain a scheme|The following build commands failed|Unexpected|does not exist" "$f" 2>/dev/null \
               | head -12 \
               | while IFS= read -r line; do
                   echo "::error::$(printf '%s' "$line" | tr -d '\r' | head -c 900)"
-                done
+                done || true
           done
 
       - name: 定位产物
         if: success()
         working-directory: ios
         run: |
-          APP=$(find . -name "NonameDecade.app" -type d | head -1)
-          echo "== 搜索到 =="
-          find . -name "*.app" -type d || true
+          # 用 -print -quit 取第一个匹配，避免 `find | head` 的 SIGPIPE 问题
+          APP=$(find . -name "NonameDecade.app" -type d -print -quit 2>/dev/null || true)
+          echo "== 搜索到的 .app =="
+          find . -name "*.app" -type d 2>/dev/null || true
           echo "解析到：$APP"
           echo "APP=$APP" >> "$GITHUB_ENV"
 
