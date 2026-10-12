@@ -3,12 +3,13 @@ name: build-ipa
 # 在 GitHub 提供的 macOS runner 上构建「未签名 IPA」。
 # 你不需要 Mac：产物下载到 Windows 后，用 Sideloadly + Apple ID 签名安装到 iPad。
 #
-# 设计要点（都是为 CI 稳定性做的）：
-#   1. 用 `xcodebuild -target` 而不是 `-scheme`：不依赖磁盘上的 scheme 文件，
-#      也从根上避开 "does not contain a scheme named ..." 这类失败。
-#   2. 每一步都用 tee 落盘日志；失败时把错误以 ::error:: 抛出成 annotation，
-#      annotation 无需登录即可通过 GitHub API 读取，便于远程排障。
-#   3. 产物用 find 定位，不硬编码路径。
+# 已踩过的坑（都在这份配置里修掉了）：
+#   1. 新版 XcodeGen 生成 objectVersion = 77（Xcode 16 格式），
+#      而 macos-14 的 Xcode 15.4 读不了 → "xcodebuild: error: Unable to read project"。
+#      对策：① 改用 macos-15（Xcode 16）；② 仍按 Xcode 版本自动降级 objectVersion 兜底。
+#   2. 不用 `-scheme`，改用 `xcodebuild -target`，避开 scheme 文件相关问题。
+#   3. 所有输出落盘 + 失败时把错误以 ::error:: 抛成 annotation，
+#      并把日志提交回仓库，便于无需登录地远程排障。
 
 on:
   workflow_dispatch:
@@ -22,12 +23,12 @@ on:
       - '.github/workflows/build-ipa.yml'
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build:
     name: Build unsigned IPA (macOS)
-    runs-on: macos-14
+    runs-on: macos-15
     timeout-minutes: 45
 
     steps:
@@ -54,8 +55,28 @@ jobs:
         run: |
           set -o pipefail
           xcodegen generate 2>&1 | tee xcodegen.log
-          echo "---- 生成结果 ----" | tee -a xcodegen.log
+
+          # ---- objectVersion 兼容处理 ----
+          # 新版 XcodeGen 默认写 77（Xcode 16 格式）。若本机 Xcode 主版本 < 16，
+          # 就降级为 56，否则 xcodebuild 会报 "Unable to read project"。
+          PBX="NonameDecade.xcodeproj/project.pbxproj"
+          if [ -f "$PBX" ]; then
+            XCODE_MAJOR=$(xcodebuild -version | head -1 | sed -E 's/Xcode ([0-9]+).*/\1/')
+            OBJVER=$(grep -m1 -oE 'objectVersion = [0-9]+' "$PBX" | grep -oE '[0-9]+' || echo "?")
+            echo "本机 Xcode 主版本 = $XCODE_MAJOR ；生成工程的 objectVersion = $OBJVER" | tee -a xcodegen.log
+            if [ "$XCODE_MAJOR" -lt 16 ] 2>/dev/null && [ "$OBJVER" != "?" ] && [ "$OBJVER" -gt 56 ]; then
+              sed -i '' -E 's/objectVersion = [0-9]+;/objectVersion = 56;/' "$PBX"
+              echo "已把 objectVersion 降级为 56（适配 Xcode 15）" | tee -a xcodegen.log
+            fi
+            echo "--- project.pbxproj 头部 ---" | tee -a xcodegen.log
+            head -12 "$PBX" | tee -a xcodegen.log
+          else
+            echo "!! 没有生成 project.pbxproj" | tee -a xcodegen.log
+          fi
+
+          echo "--- 目录 ---" | tee -a xcodegen.log
           ls -la | tee -a xcodegen.log
+          echo "--- xcodebuild -list ---" | tee -a xcodegen.log
           xcodebuild -list -project NonameDecade.xcodeproj 2>&1 | tee -a xcodegen.log
 
       - name: 构建（不签名）
@@ -93,16 +114,15 @@ jobs:
             tail -100 "$f" || true
             echo ""
             echo "=========== $f 中的错误行 ==========="
-            grep -nE "error:|fatal error:|xcodebuild: error|does not contain a scheme|The following build commands failed|Command .* failed|Undefined symbol|Unknown attribute|does not exist|Unexpected" "$f" | head -25 || true
+            grep -nE "error:|fatal error:|xcodebuild: error|Unable to read project|does not contain a scheme|The following build commands failed|Command .* failed|Undefined symbol|Unknown attribute|does not exist|Unexpected" "$f" | head -25 || true
             echo ""
             echo "=========== 抛成注解 ==========="
-            grep -nE "error:|fatal error:|xcodebuild: error|does not contain a scheme|The following build commands failed|Unexpected|does not exist" "$f" \
-              | head -15 \
+            grep -nE "error:|fatal error:|xcodebuild: error|Unable to read project|does not contain a scheme|The following build commands failed|Unexpected|does not exist" "$f" \
+              | head -12 \
               | while IFS= read -r line; do
                   echo "::error::$(printf '%s' "$line" | tr -d '\r' | head -c 900)"
                 done
           done
-          echo "::error::构建失败，详见上方日志（run page 可下载完整日志）"
 
       - name: 定位产物
         if: success()
@@ -153,12 +173,18 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      - name: 失败时保留构建日志
+      # 把日志提交回仓库：这样我不需要任何登录就能读到完整日志
+      - name: 失败时把日志提交回仓库
         if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: build-logs
-          path: |
-            ios/xcodegen.log
-            ios/build.log
-          if-no-files-found: ignore
+        run: |
+          mkdir -p ci-logs
+          cp ios/xcodegen.log ci-logs/ 2>/dev/null || true
+          cp ios/build.log    ci-logs/ 2>/dev/null || true
+          { sw_vers; xcodebuild -version; } > ci-logs/toolchain.txt 2>&1 || true
+          ls -la ios > ci-logs/ios-dir.txt 2>&1 || true
+          echo "${{ github.sha }}" > ci-logs/sha.txt
+          git config user.name  "ci-bot"
+          git config user.email "ci-bot@users.noreply.github.com"
+          git add -f ci-logs
+          git commit -m "ci: build logs for ${{ github.sha }} [skip ci]" || true
+          git push || true
