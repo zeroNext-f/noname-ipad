@@ -23,6 +23,10 @@ const { URL } = require('url');
 const PORT = parseInt(process.env.PORT || '8123', 10);
 // 默认使用工程内的 payload/game（由 tools/prepare.ps1 生成）
 const GAME_DIR = process.env.GAME_DIR || path.join(__dirname, '..', 'payload', 'game');
+
+// --lan : 绑定 0.0.0.0，让同一局域网的平板/手机用浏览器直接玩（无需装 App）
+const LAN = process.argv.includes('--lan');
+const HOST = LAN ? '0.0.0.0' : '127.0.0.1';
 const WWW_DIR = process.env.WWW_DIR || path.join(__dirname, '..', 'cordova', 'www');
 const SHIM = path.join(__dirname, '..', 'shim', 'noname-cordova-shim.js');
 
@@ -216,9 +220,26 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
-server.listen(PORT, '127.0.0.1', () => {
+server.listen(PORT, HOST, () => {
   console.log(`[noname-port] serving`);
   console.log(`  game   : ${GAME_DIR}`);
   console.log(`  shell  : ${WWW_DIR}`);
-  console.log(`  url    : http://127.0.0.1:${PORT}/`);
+  if (!LAN) {
+    console.log(`  url    : http://127.0.0.1:${PORT}/`);
+  } else {
+    const ips = [];
+    for (const list of Object.values(require('os').networkInterfaces())) {
+      for (const ni of list || []) {
+        if (ni.family === 'IPv4' && !ni.internal) ips.push(ni.address);
+      }
+    }
+    console.log('');
+    console.log('  ============================================================');
+    console.log('   局域网已开启：在 iPad 的 Safari 里打开下面任一地址即可游玩');
+    console.log('');
+    for (const ip of ips) console.log(`       http://${ip}:${PORT}/`);
+    console.log('');
+    console.log('   首次进不去就检查 Windows 防火墙是否放行了 Node。');
+    console.log('  ============================================================');
+  }
 });

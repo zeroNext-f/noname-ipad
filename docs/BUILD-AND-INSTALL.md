@@ -42,20 +42,24 @@ node tools\serve.js
 
 ### 2.1 建仓库并上传
 
-在 GitHub 新建一个仓库（**建议设为 Public**，公开仓库的 macOS 构建额度免费；
-私有仓库会消耗你账号的付费额度），然后把 `iosport` 目录推进去：
+在 GitHub 新建一个仓库（空仓库即可，**不要**勾选自动生成 README），
+然后在终端里跑一条命令：
 
 ```powershell
 cd "E:\noname-port\iosport"
-git init
-git add .
-git commit -m "无名杀 iPad 移植"
-git branch -M main
-git remote add origin https://github.com/<你的用户名>/<仓库名>.git
-git push -u origin main
+powershell -ExecutionPolicy Bypass -File tools\push-github.ps1 -Repo "https://github.com/你的用户名/你的仓库名.git"
 ```
 
-> `payload/`（2.5 GB 游戏数据）**不要**提交。在 `.gitignore` 里排除它即可。
+首次推送会弹出浏览器让你登录 GitHub，登录一次以后就不再需要。
+
+> **公开还是私有？**
+> 公开仓库的 Actions 额度免费且不限量；私有仓库免费账号每月 2000 分钟，
+> 而 macOS runner 按 **10 倍**计费（一次 6 分钟的构建 ≈ 60 分钟额度），
+> 也就是说私有仓库每月大约能跑 30 次。两者都能用。
+
+> 国内访问 github.com 慢或被墙时，可改用 SSH 地址：
+> `-Repo "git@github.com:你的用户名/你的仓库名.git"`
+> 或改用 Codemagic / Appcircle 等支持免费 macOS 构建的服务。
 
 ### 2.2 等构建完成
 
