@@ -15,6 +15,9 @@ xcuserdata/
 *.log
 lan-access.log
 
+# CI 日志（CI 会推到独立的 ci-logs 分支，不留在 main）
+ci-logs/
+
 # 系统
 .DS_Store
 Thumbs.db

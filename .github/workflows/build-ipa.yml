@@ -190,18 +190,26 @@ jobs:
           if-no-files-found: error
           retention-days: 30
 
-      # 把日志提交回仓库：这样我不需要任何登录就能读到完整日志
-      - name: 失败时把日志提交回仓库
+      # 把日志推到独立的 ci-logs 分支：这样远程排障时无需登录即可读取，
+      # 又不会污染 main（避免本地仓库与远端反复分叉）。
+      - name: 失败时把日志推到 ci-logs 分支
         if: failure()
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
         run: |
-          mkdir -p ci-logs
-          cp ios/xcodegen.log ci-logs/ 2>/dev/null || true
-          cp ios/build.log    ci-logs/ 2>/dev/null || true
-          { sw_vers; xcodebuild -version; } > ci-logs/toolchain.txt 2>&1 || true
-          ls -la ios > ci-logs/ios-dir.txt 2>&1 || true
-          echo "${{ github.sha }}" > ci-logs/sha.txt
+          rm -rf /tmp/ci-logs
+          mkdir -p /tmp/ci-logs
+          cp ios/xcodegen.log /tmp/ci-logs/ 2>/dev/null || true
+          cp ios/build.log    /tmp/ci-logs/ 2>/dev/null || true
+          { sw_vers; xcodebuild -version; xcode-select -p; } > /tmp/ci-logs/toolchain.txt 2>&1 || true
+          ls -la ios > /tmp/ci-logs/ios-dir.txt 2>&1 || true
+          echo "${{ github.sha }}" > /tmp/ci-logs/sha.txt
+          cd /tmp/ci-logs
+          git init -q
           git config user.name  "ci-bot"
           git config user.email "ci-bot@users.noreply.github.com"
-          git add -f ci-logs
-          git commit -m "ci: build logs for ${{ github.sha }} [skip ci]" || true
-          git push || true
+          git add -A
+          git commit -q -m "build logs for ${{ github.sha }}" || true
+          git push --force \
+            "https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git" \
+            HEAD:refs/heads/ci-logs || echo "推送日志分支失败（不影响其它步骤）"

@@ -1,7 +1,0 @@
-total 16
-drwxr-xr-x   6 runner  staff   192 Oct 12 13:49 .
-drwxr-xr-x  13 runner  staff   416 Oct 12 13:49 ..
-drwxr-xr-x   6 runner  staff   192 Oct 12 13:49 NonameDecade
-drwxr-xr-x   5 runner  staff   160 Oct 12 13:49 NonameDecade.xcodeproj
--rw-r--r--   1 runner  staff  2295 Oct 12 13:47 project.yml
--rw-r--r--   1 runner  staff   175 Oct 12 13:49 xcodegen.log
