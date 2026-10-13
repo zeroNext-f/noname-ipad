@@ -116,3 +116,53 @@ for (let i = 0; i < lib.changeLog.length; i++) { /* patched-out by iOS port: ...
 > 第 3 条的 `loggedIn` 是**纯本地标记**，密码随便填、不联网验证。
 > 但「单机」按钮不会写入它，所以未登录时用「单机」同样会卡住。
 
+---
+
+## ⚠️ 十周年UI 的「特效 / 皮肤」开关——**千万不要调**（2026-10-13 真机实测）
+
+**结论：关掉任何一个，都会同时造成「手牌/武将布局错位」和「更卡」。**
+
+| 配置 | `dynamicSkin` | `outcropSkin` | 结果 |
+|---|---|---|---|
+| 基线（原始值） | true | true | 布局 ✅ 正常 |
+| 变体 A | false | true | 手牌 ❌ 偏移 |
+| 变体 B | false | false | 武将 + 牌 ❌ 整体下移，**而且更卡** |
+
+**根本原因**：`extension/十周年UI/extension.js:11288` 会去请求
+
+```js
+this.js(decadeUIPath + 'dynamicSkin.js');
+```
+
+**但 `dynamicSkin.js` 在这个懒人包里根本不存在**（PC / iPad / D:\Quark 全盘搜索均无）。
+模块缺失时这套渲染会走**降级路径**，而它的坐标计算**依赖上述开关的组合**——
+「都开」是它唯一能自洽工作的状态。
+
+**同样不能动的还有**：
+
+- `extension_十周年UI_gameAnimationEffect` / `JNTX` / `cardPhantom` / `effect_panding` / `playerDieEffect`
+- `extension_千幻聆音_qhly_decadeCloseDynamic` / `decadeChangeEffect` / `decadeDynamic`
+
+改动它们同样会导致**布局出错 + 变慢**（引擎切到降级渲染路径）。
+**→ 这些开关一律保持懒人包原始值。**
+
+> **性能只能靠「减少扩展数量」来换，不能靠关这些开关。**
+
+### 扩展加载报错的正确修法
+
+`lib.config` 里 **`extensions` 和 `plays` 两个列表都要**按「实际存在的扩展」过滤：
+
+- `extensions` 里是扩展名
+- **`plays` 里是「纯扩展名」**（没有 `mode_extension_` 前缀）
+
+只过滤 `extensions` 会漏掉 `plays`，表现为启动时报
+`扩展【AIoptimize】加载失败`。
+
+### 已知但不修的无害项
+
+`loadSpine: [lianzhao_jindu] / [lianzhao_zuowei] 加载失败` —— **每次开局各 2 条**。
+
+- 素材**完整**：JSON 合法（spine 3.7），PNG 实际尺寸与 atlas 声明**完全一致**
+- 属运行时加载问题；经统计**每局仅 2 次**，与「响应时卡顿」**无相关性**
+- 判定为无害，暂不处理（如需排查，在 `animation.js:588/598` 打印失败路径即可）
+
