@@ -198,6 +198,51 @@ console.log('【补丁 7】十周年UI · ui.confirm 判空（可选链）');
 }());
 
 /* ============================================================
+ * 补丁 8：扩展「Thunder」的 spine 判空（防对局卡死）
+ * Thunder 的「神宫」场景直接 dcdAnim.playSpine(...).moveTo()，
+ * spine 是异步加载的，首次调用返回 undefined → 抛异常。
+ * 更严重：该处 game.pause() 之后只在 oncomplete 里 game.resume()，
+ * 一旦抛异常就再也不会 resume → 对局永久卡死。
+ * 这里加判空 + 兜底 resume。
+ * ============================================================ */
+console.log('【补丁 8】Thunder · spine 判空（防止对局卡死）');
+(function () {
+  const rel = 'extension/Thunder/extension.js';
+  const file = REL(rel);
+  if (!fs.existsSync(file)) { console.log('  ✗ 文件不存在: ' + rel); failed++; return; }
+  let t = fs.readFileSync(file, 'utf8');
+  const rules = [
+    {
+      marker: '/*iOS-port*/ if (!faqi',
+      re: /([ \t]*)faqi\.moveTo\(document\.body\.offsetWidth \* 0\.48, document\.body\.offsetHeight \* 0\.49, 400\);/,
+      rep: "$1/*iOS-port*/ if (!faqi || typeof faqi.moveTo !== 'function') { game.resume(); return; }\n$1faqi.moveTo(document.body.offsetWidth * 0.48, document.body.offsetHeight * 0.49, 400);",
+      note: '神宫 faqi 判空 + 兜底 resume',
+    },
+    {
+      marker: '/*iOS-port*/ if (!event.bgSpine)',
+      re: /([ \t]*)event\.bgSpine\.scaleTo\(0\.72, 490\);/,
+      rep: "$1/*iOS-port*/ if (!event.bgSpine) { game.resume(); return; }\n$1event.bgSpine.scaleTo(0.72, 490);",
+      note: '神宫 bgSpine 判空',
+    },
+    {
+      marker: '/*iOS-port*/ if (shh &&',
+      re: /([ \t]*)shh\.fadeTo\(1, 100\);/,
+      rep: "$1/*iOS-port*/ if (shh && typeof shh.fadeTo === 'function') shh.fadeTo(1, 100);",
+      note: '神宫 shh 判空',
+    },
+  ];
+  let any = 0;
+  for (const r of rules) {
+    if (t.includes(r.marker)) { console.log(`  ○ 已打过: ${r.note}  [${rel}]`); skipped++; continue; }
+    if (!r.re.test(t)) { console.log(`  ✗ 未找到目标: ${r.note}  [${rel}]`); failed++; continue; }
+    t = t.replace(r.re, r.rep);
+    console.log(`  ✓ 已应用: ${r.note}  [${rel}]`);
+    applied++; any++;
+  }
+  if (any) { fs.writeFileSync(file, t, 'utf8'); }
+}());
+
+/* ============================================================
  * 补丁 6：十周年UI extension.js 里的同一处手牌布局判空
  * 与补丁 4 代码完全一致，是同一功能的两套实现（extension.js / meihua.js），
  * 因此两处都必须加保护。
