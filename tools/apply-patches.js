@@ -292,6 +292,69 @@ console.log('【补丁 10】十周年UI · jiubuff.atlas 补全（来自标记�
 }());
 
 /* ============================================================
+ * 补丁 11：十周年UI · BoundsCache 在元素未就绪时错误地标记"已更新"
+ *
+ * 现象：手牌概率性向下偏移、武将正常、**不报任何错**、重开/换模式都可能触发。
+ *
+ * 原因：BoundsCache.update() 里
+ *        var element = this.element;
+ *        this.updated = true;               // ← 先标记已更新
+ *        if (element === undefined) return; // ← 再发现元素没建好，直接返回
+ *        this._x = element.offsetLeft; ...
+ *   于是 this._x / this._y 永远是 undefined → 参与布局运算变 NaN →
+ *   CSS 收到 "NaNpx" 是非法值被忽略 → 元素退回默认位置（向下偏移）。
+ *   而 check() 见 updated===true 就再也不重算 → 整局都错。
+ *   是否踩中取决于"首次测量时 ui.me / ui.handcards1 建好了没有" →
+ *   所以表现为概率性、无报错。
+ *
+ * 修法：元素未就绪时保持 updated = false（并把 updateBefore 里那种
+ *   "提前 return" 改成把 element 置空），等元素就绪后自动重算。
+ * ============================================================ */
+console.log('【补丁 11】十周年UI · BoundsCache 未就绪时重试（修手牌概率性下移）');
+(function () {
+  const rel = 'extension/十周年UI/extension.js';
+  const file = REL(rel);
+  if (!fs.existsSync(file)) { console.log('  ✗ 文件不存在: ' + rel); failed++; return; }
+
+  // 幂等性单独判断（三种替换互相独立）
+  let t = fs.readFileSync(file, 'utf8');
+  const already = t.includes('/* iOS-port bounds-retry */');
+  if (already) { console.log(`  ○ 已打过: BoundsCache 重试  [${rel}]`); skipped++; return; }
+
+  const rules = [
+    {
+      // 核心：不要先标记 updated
+      re: /this\.updated = true;(\s*)if \(element === undefined\) return;/,
+      rep: "/* iOS-port bounds-retry */ if (element === undefined) { this.updated = false; return; }$1this.updated = true;",
+      note: 'update(): 元素未就绪时不标记 updated',
+    },
+    {
+      // hand 缓存：ui.handcards1 未就绪时把 element 置空，让 update() 走上面的分支
+      re: /if \(ui\.handcards1 === undefined\)(\s*)return;/,
+      rep: 'if (ui.handcards1 === undefined) { this.element = undefined; return; }',
+      note: 'hand 缓存: handcards1 未就绪时重试',
+    },
+    {
+      // arena 缓存：同理
+      re: /if \(ui\.arena === undefined\)(\s*)return;/,
+      rep: 'if (ui.arena === undefined) { this.element = undefined; return; }',
+      note: 'arena 缓存: arena 未就绪时重试',
+    },
+  ];
+
+  let n = 0;
+  for (const r of rules) {
+    const m = t.match(new RegExp(r.re.source, 'g'));
+    if (!m) { console.log(`  ✗ 未找到目标: ${r.note}  [${rel}]`); failed++; continue; }
+    if (m.length > 1) { console.log(`  ✗ 目标不唯一(${m.length}处): ${r.note}  [${rel}]`); failed++; continue; }
+    t = t.replace(r.re, r.rep);
+    console.log(`  ✓ 已应用: ${r.note}`);
+    n++;
+  }
+  if (n > 0) { fs.writeFileSync(file, t, 'utf8'); applied++; }
+}());
+
+/* ============================================================
  * 补丁 6：十周年UI extension.js 里的同一处手牌布局判空
  * 与补丁 4 代码完全一致，是同一功能的两套实现（extension.js / meihua.js），
  * 因此两处都必须加保护。
