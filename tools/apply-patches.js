@@ -259,6 +259,36 @@ patch(
 );
 
 /* ============================================================
+ * 补丁 10：十周年UI 的 jiubuff.atlas 残缺 → 用「标记补充」的完整版覆盖
+ *
+ * 现象：对局中反复报
+ *   Region not found in atlas: images/xulie_* / images/hongzhehzao_* / images/hongkuang_*
+ *
+ * 原因：十周年UI 自带的 assets/animation/jiubuff.atlas 只有 171 字节、
+ *   仅 1 个 region（jiu）；而同一目录的 jiubuff.skel（与「标记补充」那份
+ *   完全相同）引用了 25 个 images/* region —— 那些只有「标记补充」的
+ *   atlas（2958 字节）才提供。即：骨骼来自 A，图集却要 B 的。
+ *
+ * 处理：把「标记补充」的完整 atlas 覆盖过来。
+ *   （jiubuff.png / jiubuff2.png 两边本就完全相同，无需改动。）
+ * ============================================================ */
+console.log('【补丁 10】十周年UI · jiubuff.atlas 补全（来自标记补充）');
+(function () {
+  const srcRel = 'extension/标记补充/animation/jiubuff.atlas';
+  const dstRel = 'extension/十周年UI/assets/animation/jiubuff.atlas';
+  const src = REL(srcRel);
+  const dst = REL(dstRel);
+  if (!fs.existsSync(dst)) { console.log(`  ✗ 文件不存在: ${dstRel}`); failed++; return; }
+  if (!fs.existsSync(src)) { console.log(`  ✗ 源文件不存在: ${srcRel}（需要完整的懒人包）`); failed++; return; }
+  const cur = fs.readFileSync(dst, 'utf8');
+  if (cur.includes('xulie')) { console.log(`  ○ 已打过: jiubuff.atlas 补全  [${dstRel}]`); skipped++; return; }
+  if (cur.length > 2000) { console.log(`  ○ 已打过（体积已正常）: [${dstRel}]`); skipped++; return; }
+  fs.copyFileSync(src, dst);
+  console.log(`  ✓ 已应用: jiubuff.atlas 补全（${cur.length} → ${fs.statSync(dst).size} 字节）  [${dstRel}]`);
+  applied++;
+}());
+
+/* ============================================================
  * 补丁 6：十周年UI extension.js 里的同一处手牌布局判空
  * 与补丁 4 代码完全一致，是同一功能的两套实现（extension.js / meihua.js），
  * 因此两处都必须加保护。
