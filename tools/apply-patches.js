@@ -284,6 +284,9 @@ console.log('【补丁 10】十周年UI · jiubuff.atlas 补全（来自标记�
   if (cur.includes('xulie')) { console.log(`  ○ 已打过: jiubuff.atlas 补全  [${dstRel}]`); skipped++; return; }
   if (cur.length > 2000) { console.log(`  ○ 已打过（体积已正常）: [${dstRel}]`); skipped++; return; }
   fs.copyFileSync(src, dst);
+  // Windows 的 CopyFile 会保留源文件的修改时间，导致"按修改日期找补丁文件"
+  // 这套识别办法失效 —— 这里强制把时间戳改成当前时间。
+  try { const now = new Date(); fs.utimesSync(dst, now, now); } catch (e) {}
   console.log(`  ✓ 已应用: jiubuff.atlas 补全（${cur.length} → ${fs.statSync(dst).size} 字节）  [${dstRel}]`);
   applied++;
 }());
