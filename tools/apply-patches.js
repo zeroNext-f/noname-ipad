@@ -166,6 +166,20 @@ patch(
 );
 
 /* ============================================================
+ * 补丁 6：十周年UI extension.js 里的同一处手牌布局判空
+ * 与补丁 4 代码完全一致，是同一功能的两套实现（extension.js / meihua.js），
+ * 因此两处都必须加保护。
+ * ============================================================ */
+console.log('【补丁 6】十周年UI · extension.js 手牌布局判空');
+patch(
+  'extension/十周年UI/extension.js',
+  'ui.skillControl && ui.skillControl.node &&',
+  'var pw = ui.skillControl.node.enable.childNodes.length > 2 ? 0.95 * bounds.width : 0.996 * bounds.width;',
+  'var pw = (ui.skillControl && ui.skillControl.node && ui.skillControl.node.enable && ui.skillControl.node.enable.childNodes.length > 2) ? 0.95 * bounds.width : 0.996 * bounds.width;',
+  '手牌布局判空（extension.js）'
+);
+
+/* ============================================================
  * 补丁 5：EpicFX 装备特效素材缺失处理
  * 代码要加载 extension/EpicFX/asset/img/sequenceFrame/equip1/
  * 下的序列帧，但该目录在本包中不存在 → 每次初始化约 500 次
