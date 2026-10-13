@@ -430,6 +430,53 @@ console.log('【补丁 12】十周年UI · 取消 46 个骨骼的开机预加载
 }());
 
 /* ============================================================
+ * 补丁 13：game.js · 技能定义已不存在时的判空（"过期技能"）
+ *
+ * 现象：对局中弹出错误框打断结算，无法继续：
+ *   TypeError: undefined is not an object (evaluating 'ifo.viewAs')
+ *     hasWuxie @ game/game.js:23715
+ *     filterPlayer @ game/game.js:37311
+ *
+ * 原因：玩家技能表里可能残留"名字还在、定义已不存在"的技能
+ *   （这些技能由后来被删除的扩展提供）。
+ *   get.info(技能名) 返回 undefined → 紧接着直接读 ifo.viewAs → 崩。
+ *   同样的写法有两处：hasWuxie(23714) 与 hasUsableCard(17069)。
+ *
+ * 修法：ifo 为空时直接跳过该技能（continue）。
+ * ============================================================ */
+console.log('【补丁 13】game.js · 过期技能判空（hasWuxie / hasUsableCard）');
+(function () {
+  const rel = 'game/game.js';
+  const file = REL(rel);
+  if (!fs.existsSync(file)) { console.log('  ✗ 文件不存在: ' + rel); failed++; return; }
+  let t = fs.readFileSync(file, 'utf8');
+  if (t.includes('iOS-port stale-skill')) { console.log(`  ○ 已打过: 过期技能判空  [${rel}]`); skipped++; return; }
+
+  const rules = [
+    {
+      re: /var ifo = get\.info\(skills\[i\]\);(\s*)if \(ifo\.viewAs && typeof ifo\.viewAs != 'function' && ifo\.viewAs\.name == 'wuxie'\)/,
+      rep: "var ifo = get.info(skills[i]);$1if (!ifo) continue; /* iOS-port stale-skill: 技能名在但定义已不存在 */$1if (ifo.viewAs && typeof ifo.viewAs != 'function' && ifo.viewAs.name == 'wuxie')",
+      note: "hasWuxie (无懈可击检查)",
+    },
+    {
+      re: /var ifo = get\.info\(skills\[i\]\);(\s*)if \(ifo\.viewAs && typeof ifo\.viewAs != 'function' && ifo\.viewAs\.name == name\)/,
+      rep: "var ifo = get.info(skills[i]);$1if (!ifo) continue; /* iOS-port stale-skill: 技能名在但定义已不存在 */$1if (ifo.viewAs && typeof ifo.viewAs != 'function' && ifo.viewAs.name == name)",
+      note: "hasUsableCard (可用牌检查)",
+    },
+  ];
+  let n = 0;
+  for (const r of rules) {
+    const m = t.match(new RegExp(r.re.source, 'g'));
+    if (!m) { console.log(`  ✗ 未找到目标: ${r.note}  [${rel}]`); failed++; continue; }
+    if (m.length > 1) { console.log(`  ✗ 目标不唯一(${m.length}处): ${r.note}  [${rel}]`); failed++; continue; }
+    t = t.replace(r.re, r.rep);
+    console.log(`  ✓ 已应用: ${r.note}`);
+    n++;
+  }
+  if (n > 0) { fs.writeFileSync(file, t, 'utf8'); applied++; }
+}());
+
+/* ============================================================
  * 补丁 6：十周年UI extension.js 里的同一处手牌布局判空
  * 与补丁 4 代码完全一致，是同一功能的两套实现（extension.js / meihua.js），
  * 因此两处都必须加保护。
