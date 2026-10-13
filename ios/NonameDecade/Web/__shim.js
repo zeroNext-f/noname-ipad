@@ -68,7 +68,7 @@
               }
             });
           } catch (e) { console.error('[idle-polyfill]', e); }
-        }, 1);
+        }, Math.min(limit, 16));
       };
       window.cancelIdleCallback = function (id) { clearTimeout(id); };
       console.log('[noname-shim] requestIdleCallback polyfill installed');
