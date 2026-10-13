@@ -355,6 +355,81 @@ console.log('【补丁 11】十周年UI · BoundsCache 未就绪时重试（修�
 }());
 
 /* ============================================================
+ * 补丁 12：十周年UI · 砍掉"开机预加载 46 个骨骼"（内存炸弹）
+ *
+ * 现象：对局打几分钟后"闪退回大厅"（App 不退出）、只有短局能打完、
+ *       重载前**没有任何报错**。
+ *
+ * 原因：animationlist.js 里的 dcdanimation_list 会被 animation.js
+ *   顺序预加载并常驻内存（animation.js:1593 的 read() 链）。
+ *   实测这 46 个骨骼的贴图**解码后合计约 709 MB**
+ *   （仅 SS_ShiWeiYanSkill 一个就 306.7 MB）。
+ *   iPad 6 只有 2 GB 内存 → WebView 内容进程被 iOS 杀掉
+ *   → 页面自动重载 → 表现为"闪退回大厅"。
+ *
+ * 修法：
+ *   A) 清空预加载列表（animationlist.js）
+ *   B) 让 playSpine 在骨骼未加载时**按需加载 + 加载完成后自动重播**
+ *      （否则 playSpine 只会打印"骨骼没有加载"然后放弃，动画就没了）
+ *   这样动画依然能用，但内存只占"本局实际用到"的那几个。
+ * ============================================================ */
+console.log('【补丁 12】十周年UI · 取消 46 个骨骼的开机预加载（省约 700MB 内存）');
+(function () {
+  // --- A) 清空预加载列表 ---
+  const relA = 'extension/十周年UI/animationlist.js';
+  const fileA = REL(relA);
+  if (!fs.existsSync(fileA)) { console.log('  ✗ 文件不存在: ' + relA); failed++; }
+  else {
+    let t = fs.readFileSync(fileA, 'utf8');
+    if (t.includes('iOS-port: 清空预加载')) { console.log(`  ○ 已打过: 预加载列表清空  [${relA}]`); skipped++; }
+    else {
+      const re = /window\.dcdanimation_list\s*=\s*\[[\s\S]*?\];/;
+      if (!re.test(t)) { console.log(`  ✗ 未找到目标: 预加载列表  [${relA}]`); failed++; }
+      else {
+        t = t.replace(re, 'window.dcdanimation_list=[]; /* iOS-port: 清空预加载（原 46 个骨骼解码后约 709MB，改为按需加载）*/');
+        fs.writeFileSync(fileA, t, 'utf8');
+        const now = new Date(); try { fs.utimesSync(fileA, now, now); } catch (e) {}
+        console.log(`  ✓ 已应用: 预加载列表清空  [${relA}]`);
+        applied++;
+      }
+    }
+  }
+
+  // --- B) playSpine 按需加载 + 自动重播 ---
+  const relB = 'extension/十周年UI/animation.js';
+  const fileB = REL(relB);
+  if (!fs.existsSync(fileB)) { console.log('  ✗ 文件不存在: ' + relB); failed++; return; }
+  let t = fs.readFileSync(fileB, 'utf8');
+  if (t.includes('iOS-port lazy-spine')) { console.log(`  ○ 已打过: playSpine 按需加载  [${relB}]`); skipped++; return; }
+  const reB = /if \(!this\.hasSpine\(sprite\.name\)\) return console\.error\('playSpine: \[' \+ sprite\.name \+ '\] 骨骼没有加载'\);/;
+  if (!reB.test(t)) { console.log(`  ✗ 未找到目标: playSpine  [${relB}]`); failed++; return; }
+  const repB = [
+    'if (!this.hasSpine(sprite.name)) {',
+    '/* iOS-port lazy-spine: 骨骼没预加载时按需加载，成功后自动重播 */',
+    'var _iosA = this, _iosArgs = arguments;',
+    'if (!_iosA.__iosLoading) _iosA.__iosLoading = {};',
+    'if (_iosA.__iosLoading[sprite.name]) return;',
+    '_iosA.__iosLoading[sprite.name] = true;',
+    'var _iosType = sprite.fileType || \'skel\';',
+    '_iosA.loadSpine(sprite.name, _iosType, function () {',
+    'delete _iosA.__iosLoading[sprite.name];',
+    '_iosA.prepSpine(sprite.name);',
+    '_iosA.playSpine.apply(_iosA, _iosArgs);',
+    '}, function () {',
+    'delete _iosA.__iosLoading[sprite.name];',
+    'console.error(\'playSpine: [\' + sprite.name + \'] 骨骼没有加载\');',
+    '});',
+    'return;',
+    '}',
+  ].join('\n\t\t\t');
+  t = t.replace(reB, repB);
+  fs.writeFileSync(fileB, t, 'utf8');
+  const now = new Date(); try { fs.utimesSync(fileB, now, now); } catch (e) {}
+  console.log(`  ✓ 已应用: playSpine 按需加载 + 自动重播  [${relB}]`);
+  applied++;
+}());
+
+/* ============================================================
  * 补丁 6：十周年UI extension.js 里的同一处手牌布局判空
  * 与补丁 4 代码完全一致，是同一功能的两套实现（extension.js / meihua.js），
  * 因此两处都必须加保护。
