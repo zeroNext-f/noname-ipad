@@ -166,6 +166,38 @@ patch(
 );
 
 /* ============================================================
+ * 补丁 7：十周年UI 的 ui.confirm / ui.confirm.node 判空
+ * 该扩展访问 ui.confirm.node.cancel 时不做判空，而 ui.confirm
+ * 可能尚未创建（作者自己在别处是判空的）。用可选链兜底，
+ * 缺失时变成对空对象的无害赋值。
+ * ============================================================ */
+console.log('【补丁 7】十周年UI · ui.confirm 判空（可选链）');
+(function () {
+  const rels = [
+    'extension/十周年UI/extension.js',
+    'extension/十周年UI/meihua.js',
+    'extension/十周年UI/markskill.js',
+    'extension/十周年UI/markskill_noname.js',
+  ];
+  const rules = [
+    [/ui\.confirm\.node\.cancel\.style\.display/g, '(ui.confirm?.node?.cancel?.style||{}).display'],
+    [/ui\.confirm\.node\.cancel\.innerHTML/g, '(ui.confirm?.node?.cancel||{}).innerHTML'],
+    [/ui\.confirm\.lastChild\.innerHTML/g, '(ui.confirm?.lastChild||{}).innerHTML'],
+  ];
+  let any = 0;
+  for (const rel of rels) {
+    const file = REL(rel);
+    if (!fs.existsSync(file)) { continue; }
+    let t = fs.readFileSync(file, 'utf8');
+    if (t.includes('ui.confirm?.node?.cancel')) { console.log(`  ○ 已打过: [${rel}]`); skipped++; continue; }
+    let n = 0;
+    for (const [re, rep] of rules) { const m = t.match(re); if (m) { n += m.length; t = t.replace(re, rep); } }
+    if (n > 0) { fs.writeFileSync(file, t, 'utf8'); console.log(`  ✓ 已应用 ${n} 处: [${rel}]`); applied++; any += n; }
+  }
+  if (any === 0) { /* 全部已处理 */ }
+}());
+
+/* ============================================================
  * 补丁 6：十周年UI extension.js 里的同一处手牌布局判空
  * 与补丁 4 代码完全一致，是同一功能的两套实现（extension.js / meihua.js），
  * 因此两处都必须加保护。
