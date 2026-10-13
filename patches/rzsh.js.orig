@@ -1,0 +1,708 @@
+// 推广UP主的模态窗口函数
+function openHelasisyURL(url,time,waitText,bilibiliText) {
+    // 创建遮罩层
+    const overlay = document.createElement('div');
+    overlay.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 9999;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: wait;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        -webkit-tap-highlight-color: transparent;  // 关键修改点
+        user-select: none;                         // 防止文字被选中
+        border-radius: 10px;
+    `;
+
+    // 创建内容窗口
+    const contentWindow = document.createElement('div');
+    contentWindow.style.cssText = `
+        width: 70%;
+        height: 70%;
+        background: white;
+        position: relative;
+        cursor: default;
+        transform: scale(0.8);
+        opacity: 0;
+        transition: transform 0.3s ease, opacity 0.3s ease;
+        overflow: hidden;
+        border-radius: 10px;
+    `;
+    const waitingText = `<span style='color: rgb(100, 255, 100)'>$</span> 秒后可关闭`,
+        closeText = `点击空白区域可关闭窗口`,
+        closeShortText = `点击这里关闭`;
+
+    // 创建iframe
+    const iframe = document.createElement('iframe');
+    iframe.src = url || 'https://b23.tv/7plJ9Il';
+    iframe.style.cssText = `
+        width: 100%;
+        height: 100%;
+        border: 0;
+    `;
+    contentWindow.appendChild(iframe);
+
+    // 创建倒计时提示
+    const countdownText = document.createElement('div');
+    countdownText.style.cssText = `
+        position: fixed;
+        bottom: 40px;
+        left: 50%;
+        transform: translateX(-50%);
+        color: white;
+        font-size: 12px;
+        text-align: center;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    `;
+    let count = time || 0;
+    countdownText.textContent = count ? '关注抖音诗筏获取最新版本，' + count + '秒后可关闭' : '点击空白区域关闭';
+
+    // 组合元素
+    overlay.appendChild(contentWindow);
+    overlay.appendChild(countdownText);
+    document.body.appendChild(overlay);
+
+    // 初始化动画
+    setTimeout(() => {
+        overlay.style.opacity = '1';
+        contentWindow.style.transform = 'scale(1)';
+        contentWindow.style.opacity = '1';
+        countdownText.style.opacity = '1';
+    }, 10);
+
+    // 倒计时逻辑
+    const timer = setInterval(() => {
+        count--;
+        countdownText.textContent = count ? `关注抖音诗筏获取最新版本，${count}秒后可关闭` : '点击空白区域关闭';
+        
+        if (count <= 0) {
+            clearInterval(timer);
+            overlay.style.cursor = 'pointer';
+            
+            // 添加关闭事件
+            setTimeout(() => {
+                const closeHandler = e => {
+                    if (e.target === overlay) {
+                        // 关闭动画
+                        overlay.style.opacity = '0';
+                        contentWindow.style.transform = 'scale(0.8)';
+                        contentWindow.style.opacity = '0';
+                        countdownText.style.opacity = '0';
+
+                        // 动画结束后移除元素
+                        const removeElement = () => {
+                            document.body.removeChild(overlay);
+                            overlay.removeEventListener('transitionend', removeElement);
+                        };
+                        overlay.addEventListener('transitionend', removeElement);
+                        
+                        // 移除点击监听
+                        overlay.removeEventListener('click', closeHandler);
+                    }
+                };
+                overlay.addEventListener('click', closeHandler);
+            }, 500);
+        }
+    }, 1000);
+};
+
+// 将推广功能整合到新代码中
+window.rzshchosen = '视频登录'; // 改这里选择登录界面：视频登录 / 蛇年限定 / 珠玉琳琅 / 忧君难寐 / default
+window.rzshscale = {
+    视频登录: {
+        type: 'video', // 视频背景模式：只需要改下面 name 的路径和视频文件名
+        name: 'video/手杀登录界面.mp4', // 例：video/login.mp4，实际路径 = 扩展目录 + 这里的路径
+        muted: true, // 自动播放必须静音，尤其是手机/浏览器内核
+        loop: true, // 循环播放
+        autoplay: true, // 自动播放
+        objectFit: 'cover', // cover=铺满屏幕可能裁切；contain=完整显示可能留黑边
+        opacity: 1, // 透明度，0~1
+        playbackRate: 1, // 播放速度，1正常，0.8慢一点，1.2快一点
+    },
+    蛇年限定: {
+        type: 'spine', //此处为判断使用骨骼还是使用纯图片，骨骼写spine，图片写img，必填
+        beijing: {
+            name: 'spine/loginAnim/赵姬/hero_zhaoji_lantangchunyan_BgBack.skel', //文件名，此处要求使用完整路径
+            x: [0, 0.3], //x坐标，前者为数值微调，后者为相对全局的位置，若不写此项则默认为[0, 0.5]
+            y: [0, 0.3], //y坐标，前者为数值微调，后者为相对全局的位置，若不写此项则默认为[0, 0.5]
+            scale: 0.5, //骨骼/图片缩放，若不写此项则默认为0.5
+			version: '4.1',
+            action: ['Idle'], //有顺序要求，请依次按照[常态,入场,攻击]的顺序填写，若没有对应骨骼则填写''（骨骼必填）
+        },
+        xingxiang: {
+            name: 'spine/loginAnim/赵姬/hero_zhaoji_lantangchunyan_Ren.skel', //文件名，此处要求使用完整路径
+            x: [0, 0.3], //x坐标，前者为数值微调，后者为相对全局的位置，若不写此项则默认为[0, 0.5]
+            y: [0, 0.3], //y坐标，前者为数值微调，后者为相对全局的位置，若不写此项则默认为[0, 0.5]
+            scale: 0.3, //骨骼/图片缩放，若不写此项则默认为0.5
+			version: '4.1',
+            action: ['Idle'], //有顺序要求，请依次按照[常态,入场,攻击]的顺序填写，若没有对应骨骼则填写''（骨骼必填）
+        },
+    },
+    珠玉琳琅: {
+        type: 'spine',
+        beijing: {
+            name: 'spine/loginAnim/曹宪/beijing.skel',
+            x: [0, 0.5],
+            y: [0, 0.5],
+            scale: 0.7,
+            action: ['play'],
+        },
+        xingxiang: {
+            name: 'spine/loginAnim/曹宪/wife_full3_3105.json',
+            x: [0, 0.3],
+            y: [0, 1.15],
+            scale: 0.7,
+            //json:true,
+            //alpha: true,
+            action: ['idle'],
+        },
+    },
+    忧君难寐: {
+        type: 'spine',
+        beijing: {
+            name: 'spine/BJ/diaochanbj.skel',
+            x: [0, 0.5],
+            y: [0, 0.5],
+            scale: 0.75,
+            angle: 0,
+            action: ['BeiJing', 'ChuChang'],
+            hit: false,
+        },
+        xingxiang: {
+            name: 'spine/Pe/diaochan.skel',
+            x: [0, 0.5],
+            y: [0, 0.5],
+            scale: 0.75,
+            angle: 0,
+            action: ['DaiJi', 'ChuChang', 'GongJi'],
+            hit: true,
+        },
+    },
+    default: {
+        type: 'img',
+        name: 'spine/bg/任婉.jpg',
+        width: 1632,
+        height: 730,
+        x: [0, 0.5],
+        y: [0, 0.5],
+        scale: 1,
+        resize: true,
+    }
+};
+'use strict';
+window.rzsh = {
+  imgPath: {
+    dodo: "",
+    wx: "",
+    nonamekill: "https://gitee.com/UnknownMaxin/as-real-as-fantasy/raw/master/images/loginui/nunder.png",
+    against: "https://gitee.com/UnknownMaxin/as-real-as-fantasy/raw/master/images/loginui/page.png"
+  },
+  author: "某个萌新"
+};
+var li1mgmx0IX = ["ksGame", "notice", "transitionScreen", "spineBg", "spinePe", "loginOverlay", "loginBox", "loginButton", "usernameInput", "passwordInput", "updateLogModal", "updateLogImage", "updateLog", "loginfo", "loginfoname", "reLog", "offlineButton", "kfBt", "sqBt", "kfSp", "kfBg", "kfHe", "kfText", "sqSp", "sqBg", "sqHe", "sqText"];
+li1mgmx0IX.forEach(function (c) {
+  var I = document.getElementById(c.toLowerCase());
+  I !== null ? window[c] = I : (alert("Element with ID ".concat(c, " not found.")), window[c] = undefined);
+});
+var li1mgmx0Ia = "";
+var li1mgmx0Ig = "../../../index.html";
+var li1mgmx0IA = "../";
+(function () {
+  var c = localStorage.getItem("noname_inited");
+  c && c !== "nodejs" && (li1mgmx0Ia = c, li1mgmx0IA = "extension/如真似幻/", li1mgmx0Ig = "file:///android_asset/www/index.html");
+})();
+var li1mgmx0IC = window.rzsh;
+fetch("https://gitee.com/UnknownMaxin/as-real-as-fantasy").then(function () {
+  var c = document.querySelector("#sqbg");
+  if (c) {
+    c.style.backgroundImage = "url(\"".concat(li1mgmx0IC.imgPath.wx, "\")");
+  }
+  var I = document.querySelector("#nunder");
+  if (I) {
+    I.style.backgroundImage = "url(\"".concat(li1mgmx0IC.imgPath.nonamekill, "\")");
+  }
+  var e = document.querySelector("#page");
+  if (e) {
+    e.style.backgroundImage = "url(\"".concat(li1mgmx0IC.imgPath.against, "\")");
+  }
+  setTimeout(function () {
+    var y = document.createElement("div");
+    y.classList.add("huanpaiwenzi");
+    y.innerHTML = window.rzsh_caution;
+    document.body.appendChild(y);
+    window.notice.play();
+    setTimeout(function () {
+      y.remove();
+      y = null;
+    }, 3000);
+  }, 1000);
+}).catch();
+if (!sessionStorage.getItem("as-reality-as-illusion")) {
+  if (window.rzsh_anticrack || Object.prototype.toString.call(window.rzsh_update) == "[object Object]") {
+    sessionStorage.setItem("as-reality-as-illusion", true);
+  } else {
+    !sessionStorage.getItem("as-fantasy-as-real") && sessionStorage.setItem("as-fantasy-as-real", true);
+  }
+}
+function li1mgmx0IV() {
+  window.loginOverlay.style.display = "block";
+  window.usernameInput.value = "";
+}
+function li1mgmx0IK() {
+  window.loginOverlay.style.display = "none";
+}
+window.offlineButton.addEventListener("click", function () {
+  sessionStorage.setItem("Network", "offline");
+  li1mgmx0IH();
+});
+window.loginButton.addEventListener("click", function () {
+  var c = window.usernameInput.value;
+  var I = window.passwordInput.value;
+  if (c != null && c.trim() != "") {
+    if (I != "") {
+      localStorage.setItem("loggedIn", c);
+      li1mgmx0IK();
+      sessionStorage.setItem("rzshg", true);
+      localStorage.getItem("loggedIn") && (window.loginfo.style.display = "flex", window.loginfoname.textContent = localStorage.getItem("loggedIn"));
+    } else {
+      var e = document.createElement("div");
+      e.classList.add("huanpaiwenzi");
+      e.innerHTML = "密码错误！";
+      document.body.appendChild(e);
+      window.notice.play();
+      setTimeout(function () {
+        e.remove();
+        e = null;
+      }, 3000);
+    }
+  } else {
+    var e = document.createElement("div");
+    e.classList.add("huanpaiwenzi");
+    e.innerHTML = "请输入账号名！";
+    document.body.appendChild(e);
+    window.notice.play();
+    setTimeout(function () {
+      e.remove();
+      e = null;
+    }, 3000);
+  }
+});
+function li1mgmx0It(e, y, B) {
+  var W = false;
+  e.addEventListener("click", function () {
+    W = !W;
+    y.style.display = W ? "block" : "none";
+    W ? document.addEventListener("click", r) : document.removeEventListener("click", r);
+  });
+  function r(k) {
+    !B.contains(k.target) && k.target !== e && (y.style.display = "none", W = false, document.removeEventListener("click", r));
+  }
+  y.style.display === "block" && (W = true, document.addEventListener("click", r));
+}
+var li1mgmx0IUpdate = window.noname_update || { version: "", changeLog: [] };
+var li1mgmx0RUpdate = window.rzsh_updatex || window.rzsh_updatey || { version: "", changeLog: [] };
+var li1mgmx0Ix = li1mgmx0IUpdate.version || "";
+var li1mgmx0IJ = li1mgmx0RUpdate.version || "";
+
+// 修改版本更新提示为使用openHelasisyURL
+li1mgmx0Ix != localStorage.getItem("changever") && (localStorage.setItem("changever", li1mgmx0Ix), openHelasisyURL('https://b23.tv/7plJ9Il'));
+li1mgmx0IJ != localStorage.getItem("exchangever") && (localStorage.setItem("exchangever", li1mgmx0IJ), openHelasisyURL(false, 16));
+
+localStorage.getItem("loggedIn") && (window.loginfo.style.display = "flex", window.loginfoname.textContent = localStorage.getItem("loggedIn"));
+document.getElementById("version").innerHTML = "V" + li1mgmx0Ix;
+document.getElementById("updateve").innerHTML = li1mgmx0Ix + "版本更新啦";
+document.getElementById("updatetext").innerHTML = (li1mgmx0IUpdate.changeLog || []).join(",<br>");
+document.getElementById("kftext").innerHTML = (li1mgmx0RUpdate.changeLog || []).join("<br>");
+function rzshApplyRemoteInfo(info) {
+  if (!info || typeof info != "object") return;
+  var remoteLog = [];
+  if (info.title) remoteLog.push(info.title);
+  if (Array.isArray(info.notice)) remoteLog = remoteLog.concat(info.notice);
+  if (remoteLog.length && document.getElementById("kftext")) {
+    document.getElementById("kftext").innerHTML = remoteLog.join("<br>");
+  }
+  if (info.version) li1mgmx0IJ = info.version;
+}
+function rzshShowRemoteNotice(info) {
+  if (!info || typeof info != "object") return;
+  var noticeId = info.noticeId || info.version || "remote";
+  if (!info.forceNotice && localStorage.getItem("rzsh_remote_notice_id") == noticeId) return;
+  var lines = Array.isArray(info.notice) ? info.notice : [];
+  if (!info.title && !lines.length) return;
+  localStorage.setItem("rzsh_remote_notice_id", noticeId);
+  var overlay = document.createElement("div");
+  overlay.style.cssText = "position:fixed;left:0;top:0;width:100%;height:100%;z-index:10000;background:rgba(0,0,0,.65);display:flex;align-items:center;justify-content:center;";
+  var box = document.createElement("div");
+  box.style.cssText = "width:72%;max-height:72%;overflow:auto;background:rgba(26,24,38,.96);color:#eadfcb;border:1px solid rgba(234,223,203,.35);border-radius:10px;padding:18px 20px;font-family:shousha,serif;font-size:18px;line-height:1.55;box-shadow:0 8px 24px rgba(0,0,0,.45);";
+  var title = document.createElement("div");
+  title.style.cssText = "font-size:24px;margin-bottom:12px;color:#f1d18a;";
+  title.textContent = info.title || "更新公告";
+  var body = document.createElement("div");
+  body.innerHTML = lines.join("<br>");
+  var close = document.createElement("div");
+  close.style.cssText = "margin-top:16px;text-align:center;color:#9fd68a;font-size:16px;";
+  close.textContent = "点击关闭";
+  box.appendChild(title);
+  box.appendChild(body);
+  if (info.downloadUrl) {
+    var link = document.createElement("div");
+    link.style.cssText = "margin-top:12px;color:#9fc8ff;font-size:14px;word-break:break-all;";
+    link.textContent = info.downloadUrl;
+    box.appendChild(link);
+  }
+  box.appendChild(close);
+  overlay.appendChild(box);
+  overlay.addEventListener("click", function (e) {
+    if (e.target === overlay || e.target === close) overlay.remove();
+  });
+  document.body.appendChild(overlay);
+}
+function rzshHandleRemoteReady() {
+  rzshApplyRemoteInfo(window.rzsh_remote);
+  rzshShowRemoteNotice(window.rzsh_remote);
+}
+window.addEventListener("rzshRemoteReady", rzshHandleRemoteReady);
+rzshHandleRemoteReady();
+window.reLog.addEventListener("click", function () {
+  window.loginfo.style.display = "none";
+  localStorage.removeItem("loggedIn");
+  li1mgmx0IV();
+});
+
+// ========== 视频登录背景支持：开始 ==========
+// 使用方式：把 window.rzshchosen 改成 '视频登录'，然后修改上面 视频登录.name 的路径即可。
+// 视频文件建议使用 mp4/h264，文件不要太大，手机端必须 muted=true 才容易自动播放。
+var rzshVideoBg = null;
+function rzshCreateVideoBg(config) {
+  if (!config || !config.name) return;
+  if (rzshVideoBg && rzshVideoBg.parentNode) {
+    try {
+      rzshVideoBg.pause();
+      rzshVideoBg.removeAttribute('src');
+      rzshVideoBg.load();
+    } catch (e) {}
+    rzshVideoBg.parentNode.removeChild(rzshVideoBg);
+    rzshVideoBg = null;
+  }
+  var video = document.createElement('video');
+  video.src = li1mgmx0Ia + li1mgmx0IA + config.name;
+  video.autoplay = config.autoplay !== false;
+  video.loop = config.loop !== false;
+  video.muted = config.muted !== false;
+  video.defaultMuted = config.muted !== false;
+  video.playsInline = true;
+  video.setAttribute('playsinline', 'true');
+  video.setAttribute('webkit-playsinline', 'true');
+  video.setAttribute('x5-video-player-type', 'h5');
+  video.setAttribute('x5-video-player-fullscreen', 'false');
+  video.preload = 'auto';
+  if (config.poster) video.poster = li1mgmx0Ia + li1mgmx0IA + config.poster;
+  if (config.playbackRate) video.playbackRate = config.playbackRate;
+  video.style.cssText = `
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    object-fit: ${config.objectFit || 'cover'};
+    z-index: 0;
+    pointer-events: none;
+    opacity: ${config.opacity == null ? 1 : config.opacity};
+    background: black;
+  `;
+  document.body.style.position = document.body.style.position || 'relative';
+  document.body.style.overflow = 'hidden';
+  document.body.insertBefore(video, document.body.firstChild);
+  var playPromise = video.play();
+  if (playPromise && playPromise.catch) {
+    playPromise.catch(function () {
+      var playOnce = function () {
+        video.play().catch(function () {});
+        document.removeEventListener('click', playOnce);
+        document.removeEventListener('touchstart', playOnce);
+      };
+      document.addEventListener('click', playOnce, { once: true });
+      document.addEventListener('touchstart', playOnce, { once: true });
+    });
+  }
+  rzshVideoBg = video;
+}
+function rzshDestroyVideoBg() {
+  if (!rzshVideoBg) return;
+  try {
+    rzshVideoBg.pause();
+    rzshVideoBg.removeAttribute('src');
+    rzshVideoBg.load();
+  } catch (e) {}
+  if (rzshVideoBg.parentNode) rzshVideoBg.parentNode.removeChild(rzshVideoBg);
+  rzshVideoBg = null;
+}
+// ========== 视频登录背景支持：结束 ==========
+
+var li1mgmx0IG;
+document.documentElement.offsetWidth < 900 || document.documentElement.offsetHeight < 500 ? li1mgmx0IG = Math.min(Math.round(document.documentElement.offsetWidth / 98) / 10, Math.round(document.documentElement.offsetHeight / 50) / 10) : li1mgmx0IG = 1;
+var li1mgmx0Id = Math.max(window.devicePixelRatio * (li1mgmx0IG ? li1mgmx0IG : 1), 1);
+var li1mgmx0If = new PIXI.Application({
+  resizeTo: document.body,
+  backgroundAlpha: 0,
+  resolution: li1mgmx0Id,
+  autoDensity: true,
+  antialias: true,
+  forceCanvas: false
+});
+document.body.appendChild(li1mgmx0If.view);
+li1mgmx0If.view.style.position = "absolute";
+li1mgmx0If.view.style.left = "0px";
+li1mgmx0If.view.style.zIndex = "1";
+li1mgmx0If.view.style.top = "0px";
+var li1mgmx0Ib = new PIXI.Application({
+  resizeTo: document.body,
+  backgroundAlpha: 0,
+  resolution: li1mgmx0Id,
+  autoDensity: true,
+  antialias: true,
+  forceCanvas: false
+});
+document.body.appendChild(li1mgmx0Ib.view);
+li1mgmx0Ib.view.style.position = "absolute";
+li1mgmx0Ib.view.style.left = "0px";
+li1mgmx0Ib.view.style.zIndex = "99";
+li1mgmx0Ib.view.style.top = "0px";
+li1mgmx0Ib.view.style.pointerEvents = "none";
+var li1mgmx0IQ = document.body.clientWidth / 1103;
+var li1mgmx0IN = document.body.clientHeight / 514;
+var li1mgmx0IF = new PIXI.Loader();
+var li1mgmx0Ip;
+var li1mgmx0Is;
+var li1mgmx0Im;
+var li1mgmx0IP;
+var li1mgmx0IR;
+var li1mgmx0IL = null;
+function li1mgmx0IShowProblem() {
+  if (li1mgmx0IL && li1mgmx0IL.parentNode) li1mgmx0IL.remove();
+  li1mgmx0IL = document.createElement("div");
+  li1mgmx0IL.classList.add("huanpaiwenzi");
+  li1mgmx0IL.innerHTML = "扩展出问题了，尝试重新安装吧/(ㄒoㄒ)/~~";
+  document.body.appendChild(li1mgmx0IL);
+  window.notice.play();
+  setTimeout(function () {
+    if (li1mgmx0IL) {
+      li1mgmx0IL.remove();
+      li1mgmx0IL = null;
+    }
+  }, 3000);
+}
+if (!window.rzshchosen || !window.rzshscale[window.rzshchosen]) {
+  window.rzshchosen = "default";
+}
+if (window.rzshscale[window.rzshchosen].type == "spine") {
+  li1mgmx0IF.add("spineBJ", li1mgmx0Ia + li1mgmx0IA + window.rzshscale[window.rzshchosen].beijing.name);
+  li1mgmx0IF.add("spinePE", li1mgmx0Ia + li1mgmx0IA + window.rzshscale[window.rzshchosen].xingxiang.name);
+} else {
+  if (window.rzshscale[window.rzshchosen].type == "img") {
+    li1mgmx0IF.add("picBJ", li1mgmx0Ia + li1mgmx0IA + window.rzshscale[window.rzshchosen].name);
+  }
+  if (window.rzshscale[window.rzshchosen].type == "video") {
+    rzshCreateVideoBg(window.rzshscale[window.rzshchosen]);
+  }
+}
+li1mgmx0IF.add("spineOT", li1mgmx0Ia + li1mgmx0IA + "spine/Ot/kaishiyouxi.skel");
+li1mgmx0IF.add("ui", li1mgmx0Ia + li1mgmx0IA + "images/ui.json");
+li1mgmx0IF.load(function () {
+  if (window.rzshscale[window.rzshchosen].type == "spine") {
+    li1mgmx0Is = new PIXI.spine.Spine(li1mgmx0IF.resources.spineBJ.spineData);
+    li1mgmx0Im = new PIXI.spine.Spine(li1mgmx0IF.resources.spinePE.spineData);
+    li1mgmx0Is.x = window.rzshscale[window.rzshchosen].beijing.x ? window.rzshscale[window.rzshchosen].beijing.x[1] * document.body.clientWidth + window.rzshscale[window.rzshchosen].beijing.x[0] : 0.5 * document.body.clientWidth;
+    li1mgmx0Is.y = window.rzshscale[window.rzshchosen].beijing.y ? window.rzshscale[window.rzshchosen].beijing.y[1] * document.body.clientHeight + window.rzshscale[window.rzshchosen].beijing.y[0] : 0.5 * document.body.clientHeight;
+    li1mgmx0Is.scale.set(window.rzshscale[window.rzshchosen].beijing.scale ? window.rzshscale[window.rzshchosen].beijing.scale : 0.5);
+    li1mgmx0Is.rotation = window.rzshscale[window.rzshchosen].beijing.angle ? window.rzshscale[window.rzshchosen].beijing.angle / 180 * Math.PI : 0;
+    li1mgmx0Im.x = window.rzshscale[window.rzshchosen].xingxiang.x ? window.rzshscale[window.rzshchosen].xingxiang.x[1] * document.body.clientWidth + window.rzshscale[window.rzshchosen].xingxiang.x[0] : 0.5 * document.body.clientWidth;
+    li1mgmx0Im.y = window.rzshscale[window.rzshchosen].xingxiang.y ? window.rzshscale[window.rzshchosen].xingxiang.y[1] * document.body.clientHeight + window.rzshscale[window.rzshchosen].xingxiang.y[0] : 0.5 * document.body.clientHeight;
+    li1mgmx0Im.scale.set(window.rzshscale[window.rzshchosen].xingxiang.scale ? window.rzshscale[window.rzshchosen].xingxiang.scale : 0.5);
+    li1mgmx0Im.rotation = window.rzshscale[window.rzshchosen].xingxiang.angle ? window.rzshscale[window.rzshchosen].xingxiang.angle / 180 * Math.PI : 0;
+    window.rzshscale[window.rzshchosen].beijing.action.length > 1 && window.rzshscale[window.rzshchosen].beijing.action[1] != "" ? (li1mgmx0Is.state.setAnimation(0, window.rzshscale[window.rzshchosen].beijing.action[1], false), li1mgmx0Is.state.addListener({
+      complete: function q() {
+        li1mgmx0Is.state.setAnimation(0, window.rzshscale[window.rzshchosen].beijing.action[0], true);
+      }
+    })) : li1mgmx0Is.state.setAnimation(0, window.rzshscale[window.rzshchosen].beijing.action[0], true);
+    window.rzshscale[window.rzshchosen].xingxiang.action.length > 1 && window.rzshscale[window.rzshchosen].xingxiang.action[1] != "" ? (li1mgmx0Im.state.setAnimation(0, window.rzshscale[window.rzshchosen].xingxiang.action[1], false), li1mgmx0Im.state.addListener({
+      complete: function o() {
+        li1mgmx0Im.state.setAnimation(0, window.rzshscale[window.rzshchosen].xingxiang.action[0], true);
+      }
+    })) : li1mgmx0Im.state.setAnimation(0, window.rzshscale[window.rzshchosen].xingxiang.action[0], true);
+    li1mgmx0If.stage.addChild(li1mgmx0Is, li1mgmx0Im);
+  } else {
+    if (window.rzshscale[window.rzshchosen].type == "img") {
+      picbj = new PIXI.Sprite(li1mgmx0IF.resources.picBJ.texture);
+      picbj.anchor.set(0.5);
+      picbj.x = window.rzshscale[window.rzshchosen].x ? window.rzshscale[window.rzshchosen].x[1] * document.body.clientWidth + window.rzshscale[window.rzshchosen].x[0] : 0.5 * document.body.clientWidth;
+      picbj.y = window.rzshscale[window.rzshchosen].y ? window.rzshscale[window.rzshchosen].y[1] * document.body.clientHeight + window.rzshscale[window.rzshchosen].y[0] : 0.5 * document.body.clientHeight;
+      picbj.rotation = window.rzshscale[window.rzshchosen].angle ? window.rzshscale[window.rzshchosen].angle / 180 * Math.PI : 0;
+      if (window.rzshscale[window.rzshchosen].resize) {
+        picbj.width = document.body.clientWidth;
+        picbj.height = document.body.clientWidth / window.rzshscale[window.rzshchosen].width * window.rzshscale[window.rzshchosen].height;
+      } else {
+        picbj.width = window.rzshscale[window.rzshchosen].width ? window.rzshscale[window.rzshchosen].width : document.body.clientWidth;
+        picbj.height = window.rzshscale[window.rzshchosen].height ? window.rzshscale[window.rzshchosen].height : document.body.clientHeight;
+        picbj.scale.set(window.rzshscale[window.rzshchosen].scale ? window.rzshscale[window.rzshchosen].scale : 0.5);
+      }
+      li1mgmx0If.stage.addChild(picbj);
+    }
+  }
+  li1mgmx0IR = new PIXI.Graphics();
+  li1mgmx0IR.beginFill(0, 0.8);
+  li1mgmx0IR.drawRect(0, 0, li1mgmx0Ib.renderer.screen.width, li1mgmx0Ib.renderer.screen.height);
+  li1mgmx0IR.endFill();
+  li1mgmx0IR.interactive = true;
+  li1mgmx0IP = new PIXI.Sprite(li1mgmx0IF.resources.ui.textures.reconnect_waiting_bg);
+  li1mgmx0IP.scale.set(0.69);
+  li1mgmx0IP.anchor.set(0.5);
+  li1mgmx0IP.position.set(0.5 * li1mgmx0Ib.screen.width, 0.5 * li1mgmx0Ib.screen.height);
+  var c = new PIXI.Text("扩展报错了，\n已禁用本扩展…", {
+    fill: "#E7EDE1",
+    stroke: "#424439",
+    strokeThickness: 5,
+    fontFamily: "shousha",
+    fontSize: 32,
+    align: "center"
+  });
+  c.alpha = 0.9;
+  c.position.set(-0.05 * li1mgmx0IP.width, -0.25 * li1mgmx0IP.height);
+  var I = new PIXI.Sprite(li1mgmx0IF.resources.ui.textures.reconnect_waiting_btn_connect);
+  I.position.set(0.3 * li1mgmx0IP.width, 0.3 * li1mgmx0IP.height);
+  var e = new PIXI.Sprite(li1mgmx0IF.resources.ui.textures.reconnect_waiting_btn_cancel);
+  e.position.set(-0.72 * li1mgmx0IP.width, 0.3 * li1mgmx0IP.height);
+  e.interactive = I.interactive = true;
+  e.on("pointerdown", function () {
+    li1mgmx0Ib.stage.removeChild(li1mgmx0IP);
+    setTimeout(function () {
+      li1mgmx0Ib.stage.addChild(li1mgmx0IP);
+    }, 500);
+  });
+  I.on("pointerdown", function () {
+    li1mgmx0Ib.stage.removeChild(li1mgmx0IP);
+    setTimeout(function () {
+      li1mgmx0Ib.stage.addChild(li1mgmx0IP);
+      li1mgmx0IShowProblem();
+    }, 500);
+  });
+  li1mgmx0IP.addChild(c, e, I);
+  li1mgmx0Ip = new PIXI.spine.Spine(li1mgmx0IF.resources.spineOT.spineData);
+  li1mgmx0Ip.state.setAnimation(0, "animation", true);
+  li1mgmx0Ip.x = 0.8 * document.body.clientWidth;
+  li1mgmx0Ip.y = 0.47 * document.body.clientHeight;
+  li1mgmx0Ip.scale.set(0.45);
+  li1mgmx0Ip.interactive = true;
+  li1mgmx0Ip.on("pointerup", li1mgmx0IS);
+  li1mgmx0If.stage.addChild(li1mgmx0Ip);
+});
+
+// 添加推广UP主的点击事件
+window.kfBt.addEventListener('click', () => {
+    openHelasisyURL();
+});
+
+window.sqBt.addEventListener('click', () => {
+    openHelasisyURL('https://qun.qq.com/universal-share/share?ac=1&authKey=v%2BO%2Fieuo4JeGfwkFrZ8td9ow5yNwrqsHezRqgg5NDlWPaksysHRzeg78lR%2BO%2FgzH&busi_data=eyJncm91cENvZGUiOiI5MzE3NDE1MjQiLCJ0b2tlbiI6IlgzY3lYZEx6cXpuL2J3QkJFUnA1NkJJcWo2aThjMVBIUFJvaEtJTll3VlVHRzRFNVZabTdEYnhrWVkzM0NZTi8iLCJ1aW4iOiIxNzYwNTM4ODU5In0%3D&data=bXgIP74tfuqhBo-23yBoFI1uRauj3Kn8S5iTlvggHP2rj0J7boyg-aO2c_i1UOffgBeVOevAU6VWIV8_iDveuA&svctype=4&tempid=h5_group_info');
+});
+
+window.updateLogImage.addEventListener('click', () => {
+    openHelasisyURL('https://docs.qq.com/doc/DS3JDVGp6VFBBUERq');
+});
+
+function li1mgmx0IS() {
+  if (window.rzsh_remote && window.rzsh_remote.blockGame) {
+    var reason = window.rzsh_remote.blockReason || "当前版本暂不可用，请查看公告或下载新版。";
+    window.alert ? alert(reason) : li1mgmx0IShowProblem();
+    li1mgmx0Ip.interactive = true;
+    return;
+  }
+  li1mgmx0Ip.interactive = false;
+  li1mgmx0Ip.state.setAnimation(0, "animation2", false);
+  li1mgmx0Ip.state.addListener({
+    complete: function c() {
+      li1mgmx0Ip.state.setAnimation(0, "animation", true);
+    }
+  });
+  window.ksGame.play();
+  window.rzshscale[window.rzshchosen].type == "spine" && (window.rzshscale[window.rzshchosen].beijing.hit || window.rzshscale[window.rzshchosen].xingxiang.hit) ? (window.rzshscale[window.rzshchosen].beijing.hit && window.rzshscale[window.rzshchosen].beijing.action[2] != "" && (li1mgmx0Is.state.setAnimation(0, window.rzshscale[window.rzshchosen].beijing.action[2], false), !window.rzshscale[window.rzshchosen].xingxiang.hit && li1mgmx0Is.state.addListener({
+    complete: function y() {
+      if (window.rzsh_anticrack || Object.prototype.toString.call(window.rzsh_update) == "[object Object]") {
+        li1mgmx0Ib.view.style.pointerEvents = "auto";
+        li1mgmx0Ib.stage.addChild(li1mgmx0IR, li1mgmx0IP);
+        li1mgmx0IShowProblem();
+      } else {
+        if (sessionStorage.getItem("rzshg") || localStorage.getItem("loggedIn") != null && localStorage.getItem("loggedIn")) {
+          sessionStorage.setItem("Network", "online");
+          li1mgmx0IH();
+        } else {
+          li1mgmx0IV();
+          li1mgmx0Ip.interactive = true;
+        }
+      }
+    }
+  })), window.rzshscale[window.rzshchosen].xingxiang.hit && window.rzshscale[window.rzshchosen].xingxiang.action[2] != "" && (li1mgmx0Im.state.setAnimation(0, window.rzshscale[window.rzshchosen].xingxiang.action[2], false), li1mgmx0Im.state.addListener({
+    complete: function q() {
+      if (window.rzsh_anticrack || Object.prototype.toString.call(window.rzsh_update) == "[object Object]") {
+        li1mgmx0Ib.view.style.pointerEvents = "auto";
+        li1mgmx0Ib.stage.addChild(li1mgmx0IR, li1mgmx0IP);
+        li1mgmx0IShowProblem();
+      } else {
+        sessionStorage.getItem("rzshg") || localStorage.getItem("loggedIn") != null && localStorage.getItem("loggedIn") ? (sessionStorage.setItem("Network", "online"), li1mgmx0IH()) : (li1mgmx0IV(), li1mgmx0Ip.interactive = true);
+      }
+    }
+  }))) : li1mgmx0Ip.state.addListener({
+    complete: function W() {
+      li1mgmx0Ip.state.setAnimation(0, "animation", true, 0);
+      if (window.rzsh_anticrack || Object.prototype.toString.call(window.rzsh_update) == "[object Object]") {
+        li1mgmx0Ib.view.style.pointerEvents = "auto";
+        li1mgmx0Ib.stage.addChild(li1mgmx0IR, li1mgmx0IP);
+        li1mgmx0IShowProblem();
+      } else {
+        if (sessionStorage.getItem("rzshg") || localStorage.getItem("loggedIn") != null && localStorage.getItem("loggedIn")) {
+          sessionStorage.setItem("Network", "online");
+          li1mgmx0IH();
+        } else {
+          li1mgmx0IV();
+          li1mgmx0Ip.interactive = true;
+        }
+      }
+    }
+  });
+}
+function li1mgmx0IH() {
+  if (Object.prototype.toString.call(window.rzsh_update) == "[object Object]") {
+    if (sessionStorage.getItem("as-fantasy-as-real")) {
+      sessionStorage.removeItem("as-fantasy-as-real");
+    } else {
+      !sessionStorage.getItem("rzshk") && sessionStorage.setItem("rzshk", true);
+    }
+    sessionStorage.getItem("as-reality-as-illusion") && sessionStorage.removeItem("as-reality-as-illusion");
+  }
+  setTimeout(function () {
+    rzshDestroyVideoBg();
+    li1mgmx0Ip.interactive = false;
+    li1mgmx0Ip.off("pointerup", li1mgmx0IS);
+    li1mgmx0IF.destroy();
+    li1mgmx0Ip.destroy();
+    window.rzshscale[window.rzshchosen].type == "spine" && (li1mgmx0Is.destroy(), li1mgmx0Im.destroy());
+    window.rzshscale[window.rzshchosen].type == "pic" && picbj.destroy();
+    li1mgmx0If.stop();
+    li1mgmx0Ip = null;
+    window.rzshscale[window.rzshchosen].type == "spine" && (li1mgmx0Is = null, li1mgmx0Im = null);
+    window.rzshscale[window.rzshchosen].type == "pic" && (picbj = null);
+    PIXI.utils.clearTextureCache();
+    li1mgmx0If.view.remove();
+    li1mgmx0If.destroy(true);
+    window.location.href = li1mgmx0Ig;
+  }, 100);
+}

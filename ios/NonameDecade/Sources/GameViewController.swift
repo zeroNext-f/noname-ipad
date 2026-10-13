@@ -67,6 +67,10 @@ final class GameViewController: UIViewController {
         let webView = WKWebView(frame: view.bounds, configuration: config)
         webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         webView.navigationDelegate = self
+        // JS 的 alert/confirm/prompt 必须由 WKUIDelegate 接管。
+        // 不实现的话 WKWebView 不会弹窗，confirm 一律返回 false ——
+        // 会导致游戏"载入超时"确认框被静默当成"取消/重新开始"，从而无限重载。
+        webView.uiDelegate = self
         webView.isOpaque = false
         webView.backgroundColor = .black
         webView.scrollView.backgroundColor = .black
@@ -132,7 +136,53 @@ final class GameViewController: UIViewController {
     }
 }
 
-// MARK: - WKNavigationDelegate
+// MARK: - WKUIDelegate（JS 弹窗）
+//
+// 游戏大量使用 alert()/confirm()（例如"游戏未正常载入"的确认框、
+// 扩展的提示、以及垫片里 navigator.notification 的降级实现）。
+// WKWebView 默认不弹窗：alert 被丢弃、confirm 直接返回 false，
+// 会让游戏误以为用户选了"重新开始"从而无限重载。这里把它接到原生弹窗。
+
+extension GameViewController: WKUIDelegate {
+
+    func webView(_ webView: WKWebView,
+                 runJavaScriptAlertPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping () -> Void) {
+        NativeBridge.appendDebugLog("[dialog] alert: \(message)")
+        let alert = UIAlertController(title: "无名杀", message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "好", style: .default) { _ in completionHandler() })
+        present(alert, animated: true)
+    }
+
+    func webView(_ webView: WKWebView,
+                 runJavaScriptConfirmPanelWithMessage message: String,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping (Bool) -> Void) {
+        NativeBridge.appendDebugLog("[dialog] confirm: \(message)")
+        let alert = UIAlertController(title: "无名杀", message: message, preferredStyle: .alert)
+        // 游戏里 confirm 为 true 表示 index=1（取消/留在当前），false 表示 index=2（重新开始→重载）
+        alert.addAction(UIAlertAction(title: "留在游戏", style: .default) { _ in completionHandler(true) })
+        alert.addAction(UIAlertAction(title: "重新载入", style: .cancel) { _ in completionHandler(false) })
+        present(alert, animated: true)
+    }
+
+    func webView(_ webView: WKWebView,
+                 runJavaScriptTextInputPanelWithPrompt prompt: String,
+                 defaultText: String?,
+                 initiatedByFrame frame: WKFrameInfo,
+                 completionHandler: @escaping (String?) -> Void) {
+        NativeBridge.appendDebugLog("[dialog] prompt: \(prompt)")
+        let alert = UIAlertController(title: "无名杀", message: prompt, preferredStyle: .alert)
+        alert.addTextField { $0.text = defaultText }
+        alert.addAction(UIAlertAction(title: "取消", style: .cancel) { _ in completionHandler(nil) })
+        alert.addAction(UIAlertAction(title: "确定", style: .default) { _ in
+            completionHandler(alert.textFields?.first?.text)
+        })
+        present(alert, animated: true)
+    }
+}
+
 
 extension GameViewController: WKNavigationDelegate {
 

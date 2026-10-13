@@ -237,7 +237,11 @@ final class LocalHTTPServer {
         var length = total
         var extraHeaders: [String: String] = [
             "Accept-Ranges": "bytes",
-            "Cache-Control": "no-cache",
+            // 绝不缓存：否则替换游戏里的文件后，WKWebView 仍会拿旧版本
+            // （曾导致补丁完全不生效，排查了很久）
+            "Cache-Control": "no-store, no-cache, must-revalidate, max-age=0",
+            "Pragma": "no-cache",
+            "Expires": "0",
             "Content-Type": type
         ]
 

@@ -95,7 +95,7 @@
   try {
     var LT_KEY = 'noname_0.9_loadtime';
     var cur = parseInt(localStorage.getItem(LT_KEY), 10);
-    if (!cur || cur < 30000) localStorage.setItem(LT_KEY, '60000');
+    if (!cur || cur < 600000) localStorage.setItem(LT_KEY, '600000');
   } catch (e) { /* localStorage 不可用时忽略 */ }
 
   /* ------------------------------------------------------------------

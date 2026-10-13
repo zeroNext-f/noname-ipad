@@ -135,8 +135,17 @@ const bridge = {
     await fsp.rename(tmp, full);
     return { ok: true, size: buf.length };
   },
-  // 存档导入相关：桌面验证阶段先直接回「无数据」，由游戏走全新存档
-  async importGameData() { return { hasData: false }; },
+  // 存档导入：默认无数据；设置环境变量 IMPORT_FILE 指向懒人包数据文件时，
+  // 会把该文件（base64）交给壳的 app.importData 导入，用于在桌面复现 iPad 的场景。
+  async importGameData() {
+    const f = process.env.IMPORT_FILE;
+    if (f && fs.existsSync(f)) {
+      const b64 = fs.readFileSync(f, 'latin1').replace(/\s+/g, '');
+      console.log(`[bridge] importGameData -> 注入 ${f} (${b64.length} 字符)`);
+      return { data: b64 };
+    }
+    return { hasData: false };
+  },
   async extensionAction({ action }) { return { ok: true, action }; },
 };
 
