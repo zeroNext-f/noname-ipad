@@ -243,6 +243,22 @@ console.log('【补丁 8】Thunder · spine 判空（防止对局卡死）');
 }());
 
 /* ============================================================
+ * 补丁 9：game.js · sortCard() 判空
+ * 原代码 game.sortCard 第一行直接读 game.me.buff.forbidSort，
+ * 但 game.me 有可能还没挂上 buff 对象 → TypeError →
+ * 本次「整理手牌」整个中断（表现为手牌不整理 / 位置异常）。
+ * 实测日志：game.js:33271  TypeError: game.me.buff.forbidSort
+ * ============================================================ */
+console.log('【补丁 9】game.js · sortCard 判空');
+patch(
+  'game/game.js',
+  'game.me && game.me.buff && game.me.buff.forbidSort',
+  'if (arguments[0] != true && game.me.buff.forbidSort) return;',
+  'if (arguments[0] != true && game.me && game.me.buff && game.me.buff.forbidSort) return; /* patched by iOS port */',
+  'sortCard 判空'
+);
+
+/* ============================================================
  * 补丁 6：十周年UI extension.js 里的同一处手牌布局判空
  * 与补丁 4 代码完全一致，是同一功能的两套实现（extension.js / meihua.js），
  * 因此两处都必须加保护。
