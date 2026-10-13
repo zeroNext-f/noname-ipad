@@ -49,6 +49,33 @@
   }
 
   /* ------------------------------------------------------------------
+   * 1.5) Chromium 专有 API 补丁
+   *   requestIdleCallback / cancelIdleCallback 是 Blink(Chromium) 专有，
+   *   Safari/WebKit（含 WKWebView）没有实现。十周年UI、皮肤切换等扩展
+   *   用它驱动动画主循环，缺失会在调用处抛 ReferenceError → 对局卡死。
+   * ------------------------------------------------------------------ */
+  (function () {
+    if (typeof window.requestIdleCallback !== 'function') {
+      window.requestIdleCallback = function (cb, options) {
+        var start = Date.now();
+        var limit = (options && typeof options.timeout === 'number') ? options.timeout : 50;
+        return setTimeout(function () {
+          try {
+            cb({
+              didTimeout: false,
+              timeRemaining: function () {
+                return Math.max(0, limit - (Date.now() - start));
+              }
+            });
+          } catch (e) { console.error('[idle-polyfill]', e); }
+        }, 1);
+      };
+      window.cancelIdleCallback = function (id) { clearTimeout(id); };
+      console.log('[noname-shim] requestIdleCallback polyfill installed');
+    }
+  }());
+
+  /* ------------------------------------------------------------------
    * 2) 游戏根路径 = lib.assetURL
    * ------------------------------------------------------------------ */
   var ROOT = (function () {
